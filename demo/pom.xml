@@ -43,11 +43,17 @@
             <scope>compile</scope>
         </dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>com.alibaba</groupId>-->
-<!--			<artifactId>fastjson</artifactId>-->
-<!--			<version>1.2.51</version>-->
-<!--		</dependency>-->
+		<!--Spring Boot连接MySQL数据库所添加的依赖-->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+			<version>2.1.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
     </dependencies>
 
 	<build>

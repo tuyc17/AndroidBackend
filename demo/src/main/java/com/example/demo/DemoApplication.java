@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.domain.User;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -39,10 +41,10 @@ public class DemoApplication {
 //	}
 
 //	// @GetMapping会在接收到get类型的url时进行匹配
-//	@GetMapping("/hello")
-//	public String hello_test(@RequestParam(value = "name", defaultValue = "World") String name) {
-//		return String.format("Hello %s!", name);
-//	}
+	@GetMapping("/hello")
+	public String hello_test(@RequestParam(value = "name", defaultValue = "World") String name) {
+		return String.format("Hello %s!", name);
+	}
 //
 //	@GetMapping("/info")
 //	// 两种传参方式，通过@RequestParam注解标注形参列表，或者使用自定义的对象传参
@@ -111,31 +113,38 @@ public class DemoApplication {
 
 	// 查询用户信息，请求类型GET，前端提供用户id，后端返回用户信息
 	@GetMapping("/info")	// 测试：从后端传去一个类（成功，在浏览器中显示）
-	public User infoUserClass(@RequestParam(value = "Userid", defaultValue = "-1") Integer userid) {
+	public String infoUserClass(@RequestParam(value = "Userid", defaultValue = "-1") Integer userid) throws JSONException {
 		// 非常神奇，defaultValue必须是String类型的，框架会根据后面指定的类型自动转换
 		// TODO：根据userid在数据库中找到对应的用户
 		User targetUser = new User();
 		targetUser.setUserId(userid);
-		return targetUser;
+		JSONObject test = new JSONObject();
+		test.put("num", 1234);
+		return test.toString();
 	}
-//	@GetMapping("/info-json")	// 测试：从后端传去一个json（失败，显示Whitelabel Error Page）
-//	public JSONObject infoUserJson(@RequestParam(value = "Userid", defaultValue = "user_id") Integer userid, HttpServletResponse resp) {
+//	@GetMapping("/infojson")	// 测试：从后端传去一个json（失败，显示Whitelabel Error Page）
+//	public String infoUserJson(@RequestParam(value = "Userid", defaultValue = "user_id") Integer userid, HttpServletResponse resp) {
 //		JSONObject testJson = new JSONObject();
+//		String testResult = "123";
 //		try {
 //			testJson.put("userID", userid);
 //			testJson.put("method", "HttpServletResponse");
 //		} catch(JSONException e) {
 //			// Do nothing.
-//			return new JSONObject();
+//			return String.format("%s", testResult);
 //		}
 //		// this.writeJson(resp, testJson);
-//		return testJson.toJSONArray();
+//		// return testJson.toString();
+//		String t = "123";
+//		return t;
+//		// return String.format("Hello %s!", testResult);
+//		// return String.format("%s", testResult);
 //	}
 
 	// 修改个人信息，请求类型POST，前端提供新的个人信息，后端返回状态码
 	// 考虑到这样下去url可能太多了，可能会有API合并代表一类操作，然后根据具体的某个参数取值来区分。或者直接从前端传来修改后的完整信息
 	@PostMapping("/change")
-	public User changeUser(@RequestParam(value = "newInfo") JSONObject newInfo) {
+	public User changeUser(@RequestParam(value = "newInfo") String newInfo) {
 		// TODO：parse newInfo
 		User changedUser = new User();
 		// TODO：changedUser.set...
