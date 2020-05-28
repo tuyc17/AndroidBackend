@@ -1,11 +1,11 @@
 package com.example.demo;
 
 public class User {
-    public String getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
@@ -50,7 +50,7 @@ public class User {
     }
 
     // 后端识别信息
-    private String userId;      // 用户序号（数据库存储与后端保存用）（有改成int的可能）
+    private Integer userId;      // 用户序号（数据库存储与后端保存用）（有改成int的可能）
     // 用户注册与登录信息
     private String userName;    // 用户名
     private String passWord;    // 用户密码
