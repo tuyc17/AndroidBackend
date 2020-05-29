@@ -12,7 +12,7 @@ import com.example.demo.dao.UserRepository;
 import com.example.demo.domain.User;
 
 @RestController
-@RequestMapping("user") // TODO:注意这里有RequestMapping，我担心这会与url匹配产生某些化学反应
+@RequestMapping("user")
 public class UserController {
 
     @Autowired
