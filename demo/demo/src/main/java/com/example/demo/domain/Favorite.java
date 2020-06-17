@@ -17,14 +17,13 @@ import javax.persistence.Table;
 public class Favorite implements Serializable {
     private static final long serialVersionUID = 1L;
 
-//    // 用户id，主键，自增
-//    @Id
-//    @GeneratedValue
-//    private Integer id;
+    // 用户id、文章id双主键
     // 用户id
+    @Id
     @Column(name = "userid")
     private Integer userId;
     // 文章id
+    @Id
     @Column(name = "articleid")
     private Integer articleId;
     // 收藏夹名

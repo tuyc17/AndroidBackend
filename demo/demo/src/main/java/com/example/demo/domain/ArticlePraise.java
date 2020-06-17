@@ -5,7 +5,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -17,10 +16,13 @@ import javax.persistence.Table;
 public class ArticlePraise implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 用户id和文章id双主键
     // 用户id
+    @Id
     @Column(name = "userid")
     private Integer userId;
     // 文章id
+    @Id
     @Column(name = "articleid")
     private Integer articleId;
     // 点赞时间

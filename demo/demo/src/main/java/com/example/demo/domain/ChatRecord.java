@@ -5,7 +5,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -17,14 +16,13 @@ import javax.persistence.Table;
 public class ChatRecord implements Serializable {
     private static final long serialVersionUID = 1L;
 
-//    // 聊天记录id，主键，自增
-//    @Id
-//    @GeneratedValue
-//    private Integer id;
+    // 发送者id与接收者id双主键
     // 发送者id
+    @Id
     @Column(name = "senderid")
     private Integer senderId;
     // 接收者id
+    @Id
     @Column(name = "receiverid")
     private Integer receiverId;
     // 发送时间

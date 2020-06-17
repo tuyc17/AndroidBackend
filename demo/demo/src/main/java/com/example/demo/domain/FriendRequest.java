@@ -17,10 +17,13 @@ import javax.persistence.Table;
 public class FriendRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 用户id、请求对象id双主键
     // 用户id
+    @Id
     @Column(name = "userid")
     private Integer userId;
     // 请求对象id
+    @Id
     @Column(name = "targetid")
     private Integer targetId;
     // 是否处理

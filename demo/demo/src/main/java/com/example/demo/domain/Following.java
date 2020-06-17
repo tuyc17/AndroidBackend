@@ -17,14 +17,13 @@ import javax.persistence.Table;
 public class Following implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    //    // 用户id，主键，自增
-//    @Id
-//    @GeneratedValue
-//    private Integer id;
+    // 用户id、被关注者id双主键
     // 用户id
+    @Id
     @Column(name = "userid")
     private Integer userId;
     // 该用户关注之人的id
+    @Id
     @Column(name = "followingid")
     private Integer followingId;
 

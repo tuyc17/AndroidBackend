@@ -17,11 +17,9 @@ import javax.persistence.Table;
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    //    // 用户id，主键，自增
-//    @Id
-//    @GeneratedValue
-//    private Integer id;
+    // 主键 用户id
     // 用户id
+    @Id
     @Column(name = "userid")
     private Integer userId;
     // 是否有新通知

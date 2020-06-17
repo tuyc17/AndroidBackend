@@ -17,10 +17,13 @@ import javax.persistence.Table;
 public class CommentPraise implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 用户id与评论id双主键
     // 用户id
+    @Id
     @Column(name = "userid")
     private Integer userId;
     // 评论id
+    @Id
     @Column(name = "commentid")
     private Integer commentId;
     // 点赞时间
