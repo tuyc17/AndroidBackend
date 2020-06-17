@@ -30,6 +30,7 @@ public class UserController {
     @ResponseBody
     public User getByUserName(String userName) {
         User user = userRepository.findByUserName(userName);
+
         return user;
     }
 
