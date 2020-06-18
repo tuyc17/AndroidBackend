@@ -1,7 +1,10 @@
 package com.example.demo.domain;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,16 +53,10 @@ public class Friend implements Serializable {
     @Id
     @Column(name = "friendid")
     private Integer friendId;
-
     public Friend() {
         super();
     }
 
-//    public User(String userName, String passWord) {
-//        super();
-//        this.userName = userName;
-//        this.passWord = passWord;
-//    }
 
 
     public Integer getUserId() {

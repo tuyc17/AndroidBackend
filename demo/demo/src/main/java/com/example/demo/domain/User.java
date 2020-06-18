@@ -8,12 +8,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 // 1,用户类，用于表示每个特定用户的基本信息
 // 用户基本信息，包括用户id，姓名，昵称，学号，密码，上次登录时间，在线状态，大v标识
 // 2020/6/16 涂亦驰
 @Entity
 @Table(name = "user")
+//类注解，空列不参与序列化
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     // 用户id，主键，自增
