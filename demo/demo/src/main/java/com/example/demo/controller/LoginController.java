@@ -8,11 +8,10 @@ import java.util.HashMap;
 
 @Controller
 // @SpringBootApplication
-@RequestMapping("/springboot")
-public class HelloController {
-    @RequestMapping("/hello")
-    public String helloHtml() {
+public class LoginController {
+    @RequestMapping("/login")
+    public String loginHtml() {
         // System.out.println("进入后台");
-        return "hello";
+        return "login";
     }
 }
