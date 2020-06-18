@@ -14,9 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //关闭跨域攻击防护
+        http.csrf().disable();
         http
                 // .ignoring().antMatchers()
                 .authorizeRequests()

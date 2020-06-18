@@ -1,5 +1,7 @@
 package com.example.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -13,6 +15,8 @@ import javax.persistence.Table;
 // 2020/6/17 涂亦驰
 @Entity
 @Table(name = "chatrecord")
+//类注解，空列不参与序列化
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChatRecord implements Serializable {
     private static final long serialVersionUID = 1L;
 

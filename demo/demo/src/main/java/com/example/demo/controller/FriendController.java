@@ -1,4 +1,5 @@
 package com.example.demo.controller;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,12 +7,11 @@ import java.util.Map;
 
 
 import com.example.demo.domain.User;
+import com.example.demo.domain.ChatRecord;
+
 import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dao.FriendRepository;
 import com.example.demo.dao.UserRepository;
@@ -23,11 +23,12 @@ public class FriendController {
     private FriendRepository friendRepository;
     @Autowired
     private UserRepository userRepository;
+
     //获取所有好友信息
     @GetMapping("/getfriend")
     @ResponseBody
-    public Map<String,Object> getFriend(Integer id) {
-        Map<String,Object> map = new HashMap<>();
+    public Map<String, Object> getFriend(Integer id) {
+        Map<String, Object> map = new HashMap<>();
         List<User> retUser = new ArrayList<>();
         List<Integer> friendList = friendRepository.getAllFriend(id);
         for (Integer integer : friendList) {
@@ -35,17 +36,82 @@ public class FriendController {
             User tempUser = userRepository.findById(integer).get();
             retUser.add(tempUser);
         }
-        map.put("friends",retUser);
-
-        map.put("status",200);
+        map.put("friends", retUser);
+        map.put("status", 200);
         return map;
-
     }
-//    @RequestMapping("/getAllUser")
-//    @ResponseBody
-//    public List<User> findAll() {
-//        List<User> list ;
-//        list = userRepository.findAll();
-//        return list;
-//    }
+
+    // 获取特定聊天信息
+    @GetMapping("/getmsg")
+    @ResponseBody
+    public Map<String, Object> getMsg(Integer id, Integer friendId) {
+        Map<String, Object> map = new HashMap<>();
+        List<Object[]> retChatRecord;
+        List<Map<String, Object>> ret = new ArrayList<>();
+        retChatRecord = friendRepository.getMsg(id, friendId);
+
+        //下面转换一下格式
+        String[] strList = {"senderid", "receiverid", "content", "isread", "sendtime"};
+        for (Object[] record : retChatRecord) {
+            Map<String, Object> temp = new HashMap<>();
+            for (int i = 0; i < strList.length; i++) {
+                if (record[i] != null) {
+                    temp.put(strList[i], record[i]);
+                }
+            }
+            ret.add(temp);
+        }
+
+        map.put("chatlist", ret);
+        map.put("status", 200);
+        return map;
+    }
+    // 添加好友
+    @PostMapping("/addfriend")
+    @ResponseBody
+    public Map<String, Object> addFriend(Integer id, Integer friendId){
+        Map<String, Object> map = new HashMap<>();
+        int code;
+        try {
+            code = friendRepository.addFriend(id,friendId)+friendRepository.addFriend(friendId,id);
+        }
+        catch (Exception e){
+            code = 1;
+        }
+
+        if (code == 2){
+            map.put("status", 200);
+        }
+        else{
+            map.put("status", "已添加此人为好友，前端疑似出错！");
+        }
+        return map;
+    }
+
+    // 删除好友
+    @PostMapping("/deletefriend")
+    @ResponseBody
+    public Map<String, Object> deleteFriend(Integer id, Integer friendId){
+        Map<String, Object> map = new HashMap<>();
+        int code;
+        try {
+            code = friendRepository.deleteFriend(id,friendId)+friendRepository.deleteFriend(friendId,id);
+        }
+        catch (Exception e){
+            code = 1;
+        }
+
+        if (code == 2){
+            map.put("status", 200);
+        }
+        else{
+            map.put("status", "此人已被删除，前端疑似出错！");
+        }
+        return map;
+    }
+    // 向好友发送信息
+    // 发送添加好友请求
+    // 接受添加好友请求
+    // 获取当前好友请求
+
 }
