@@ -1,10 +1,11 @@
 package com.example.demo.controller;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Date;
 
 import com.example.demo.domain.User;
 import com.example.demo.domain.ChatRecord;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dao.FriendRepository;
 import com.example.demo.dao.UserRepository;
+import sun.util.calendar.BaseCalendar;
+import sun.util.calendar.LocalGregorianCalendar;
 
 @RestController
 @RequestMapping("friend")
@@ -49,7 +52,7 @@ public class FriendController {
         List<Object[]> retChatRecord;
         List<Map<String, Object>> ret = new ArrayList<>();
         retChatRecord = friendRepository.getMsg(id, friendId);
-
+        // TODO:记得把聊天信息的未读更新
         //下面转换一下格式
         String[] strList = {"senderid", "receiverid", "content", "isread", "sendtime"};
         for (Object[] record : retChatRecord) {
@@ -76,7 +79,7 @@ public class FriendController {
             code = friendRepository.addFriend(id,friendId)+friendRepository.addFriend(friendId,id);
         }
         catch (Exception e){
-            code = 1;
+            code = -1;
         }
 
         if (code == 2){
@@ -98,7 +101,7 @@ public class FriendController {
             code = friendRepository.deleteFriend(id,friendId)+friendRepository.deleteFriend(friendId,id);
         }
         catch (Exception e){
-            code = 1;
+            code = -1;
         }
 
         if (code == 2){
@@ -110,6 +113,27 @@ public class FriendController {
         return map;
     }
     // 向好友发送信息
+    @PostMapping("/sendMsg")
+    @ResponseBody
+    public Map<String, Object> sendMsg(Integer id, Integer friendId,String content){
+        Map<String, Object> map = new HashMap<>();
+        java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
+        int code;
+        try {
+            code =  friendRepository.sendMsg(id,friendId,content,ctime);
+        }
+        catch (Exception e){
+            code = -1;
+        }
+
+        if (code == 1){
+            map.put("status", 200);
+        }
+        else{
+            map.put("status", "发送消息失败");
+        }
+        return map;
+    }
     // 发送添加好友请求
     // 接受添加好友请求
     // 获取当前好友请求
