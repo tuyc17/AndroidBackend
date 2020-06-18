@@ -60,11 +60,11 @@
 			<version>3.4.2</version>
 		</dependency>
 
-<!--		&lt;!&ndash;spring-security依赖&ndash;&gt;-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-security</artifactId>-->
-<!--		</dependency>-->
+		<!--spring-security依赖-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 		<!--HTML依赖-->
 		<dependency>
