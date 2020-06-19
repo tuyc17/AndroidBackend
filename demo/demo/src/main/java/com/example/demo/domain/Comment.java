@@ -3,11 +3,7 @@ package com.example.demo.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 // 4,评论类，用于表示对某篇文章或评论的具体评论的信息
 // 评论信息，包括评论id，父文章id，父评论id，评论作者id，评论内容路径，点赞数，发布时间
@@ -19,7 +15,7 @@ public class Comment implements Serializable {
 
     // 评论id，主键，自增
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     // 父文章id
     @Column(name = "farticleid")
@@ -31,8 +27,8 @@ public class Comment implements Serializable {
     @Column(name = "authorid")
     private Integer authorId;
     // 评论内容路径
-    @Column(name = "commentpath")
-    private String commentPath;
+    @Column(name = "content")
+    private String content;
     // 点赞数
     @Column(name = "praisecount")
     private Integer praiseCount;
@@ -84,12 +80,12 @@ public class Comment implements Serializable {
         this.authorId = authorId;
     }
 
-    public String getCommentPath() {
-        return commentPath;
+    public String getContent() {
+        return content;
     }
 
-    public void setCommentPath(String commentPath) {
-        this.commentPath = commentPath;
+    public void setContent(String commentPath) {
+        this.content = commentPath;
     }
 
     public Integer getPraiseCount() {

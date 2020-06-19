@@ -21,7 +21,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 // .ignoring().antMatchers()
                 .authorizeRequests()
-                .antMatchers("/user/**", "/login","/friend/**") // 不需要登录就可以访问
+                .antMatchers("/user/**", "/login","/friend/**","/article/**") // 不需要登录就可以访问
                 .permitAll()
                 .antMatchers("/userOnly/**").hasAnyRole("USER") // 需要具有ROLE_USER角色才能访问
                 .antMatchers("/adminOnly/**").hasAnyRole("ADMIN") // 需要具有ROLE_ADMIN角色才能访问

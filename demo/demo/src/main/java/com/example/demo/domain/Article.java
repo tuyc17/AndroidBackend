@@ -4,11 +4,7 @@ import java.io.Serializable;
 import java.sql.Time;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 // 3,文章类，用于表示每篇特定文章的信息
 // 文章信息，包括文章id，标题，文章模块分类，作者id，文章内容路径，点赞数，发布时间，是否被强制下
@@ -20,7 +16,7 @@ public class Article implements Serializable {
 
     // 文章id，主键，自增
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     // 文章标题（如：《中单卡特技巧与攻略》）
     @Column(name = "articlename")
@@ -31,13 +27,13 @@ public class Article implements Serializable {
     // 作者id（User.id）
     @Column(name = "authorid")
     private Integer authorId;
-    // 文章内容路径（url）
-    @Column(name = "articlepath")
-    private String articlePath;
+    // 文章内容
+    @Column(name = "content")
+    private String content;
     // 点赞数
     @Column(name = "praisecount")
     private Integer praiseCount;
-    // 发布日期与时间 TODO:疑似Date中有Calendar类可以获取日期和时间 https://blog.csdn.net/mengshi_/article/details/84666293
+    // 发布日期与时间
     @Column(name = "publishtime")
     private Date publishTime;
     // 是否被强制下架
@@ -86,12 +82,12 @@ public class Article implements Serializable {
         this.authorId = authorId;
     }
 
-    public String getArticlePath() {
-        return articlePath;
+    public String getContent() {
+        return content;
     }
 
-    public void setArticlePath(String articlePath) {
-        this.articlePath = articlePath;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public Integer getPraiseCount() {
