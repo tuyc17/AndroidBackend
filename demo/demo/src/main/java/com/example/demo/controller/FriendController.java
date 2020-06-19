@@ -70,11 +70,27 @@ public class FriendController {
         return map;
     }
     // 添加好友
+    // 接受添加好友请求
     @PostMapping("/addfriend")
     @ResponseBody
     public Map<String, Object> addFriend(Integer id, Integer friendId){
         Map<String, Object> map = new HashMap<>();
         int code;
+        // 先把好友请求列表中的内容置为已处理
+        try {
+            code = friendRepository.admitRequest(id,friendId);
+        }
+        catch (Exception e){
+            code = -1;
+        }
+        if (code == 1){
+            map.put("status", 200);
+        }
+        else{
+            map.put("status", "好友请求接受失败");
+            return map;
+        }
+
         try {
             code = friendRepository.addFriend(id,friendId)+friendRepository.addFriend(friendId,id);
         }
@@ -87,10 +103,32 @@ public class FriendController {
         }
         else{
             map.put("status", "已添加此人为好友，前端疑似出错！");
+            return map;
         }
         return map;
     }
-
+    // 拒绝好友添加请求
+    @PostMapping("/rejectfriend")
+    @ResponseBody
+    public Map<String, Object> rejectFriend(Integer id, Integer friendId){
+        Map<String, Object> map = new HashMap<>();
+        int code;
+        // 先把好友请求列表中的内容置为已处理
+        try {
+            code = friendRepository.rejectRequest(id,friendId);
+        }
+        catch (Exception e){
+            code = -1;
+        }
+        if (code == 1){
+            map.put("status", 200);
+        }
+        else{
+            map.put("status", "好友请求拒绝失败");
+            return map;
+        }
+        return map;
+    }
     // 删除好友
     @PostMapping("/deletefriend")
     @ResponseBody
@@ -113,7 +151,7 @@ public class FriendController {
         return map;
     }
     // 向好友发送信息
-    @PostMapping("/sendMsg")
+    @PostMapping("/sendmsg")
     @ResponseBody
     public Map<String, Object> sendMsg(Integer id, Integer friendId,String content){
         Map<String, Object> map = new HashMap<>();
@@ -135,7 +173,49 @@ public class FriendController {
         return map;
     }
     // 发送添加好友请求
-    // 接受添加好友请求
-    // 获取当前好友请求
+    @PostMapping("/sendrequest")
+    @ResponseBody
+    public Map<String, Object> sendRequest(Integer id, Integer friendId,String content){
+        Map<String, Object> map = new HashMap<>();
+        java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
+        int code;
+        try {
+            code =  friendRepository.sendRequest(id,friendId,ctime,content);
+        }
+        catch (Exception e){
+            code = -1;
+        }
 
+        if (code == 1){
+            map.put("status", 200);
+        }
+        else{
+            map.put("status", "发送添加请求失败");
+        }
+        return map;
+    }
+    // 获取当前好友请求
+    @GetMapping("/getrequest")
+    @ResponseBody
+    public Map<String, Object> getRequest(Integer id, Integer friendId) {
+        Map<String, Object> map = new HashMap<>();
+        List<Object[]> retRequest;
+        List<Map<String, Object>> ret = new ArrayList<>();
+        retRequest = friendRepository.getRequest(id);
+        // TODO:记得把聊天信息的未读更新
+        //下面转换一下格式
+        String[] strList = {"userid", "targetid", "ishandled", "isrejected", "rejecttime", "requesttime", "verifyinfo"};
+        for (Object[] request : retRequest) {
+            Map<String, Object> temp = new HashMap<>();
+            for (int i = 0; i < strList.length; i++) {
+                if (request[i] != null) {
+                    temp.put(strList[i], request[i]);
+                }
+            }
+            ret.add(temp);
+        }
+        map.put("requestlist", ret);
+        map.put("status", 200);
+        return map;
+    }
 }
