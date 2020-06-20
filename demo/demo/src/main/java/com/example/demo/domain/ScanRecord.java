@@ -29,6 +29,12 @@ public class ScanRecord implements Serializable {
     // 浏览时间
     @Column(name = "scantime")
     private Date scanTime;
+    // 文章标题（如：《中单卡特技巧与攻略》）
+    @Column(name = "articlename")
+    private String articleName;
+    // 文章所属主题（theme）
+    @Column(name = "articletheme")
+    private String articleTheme;
 
     public ScanRecord() {
         super();
@@ -40,6 +46,22 @@ public class ScanRecord implements Serializable {
 //        this.passWord = passWord;
 //    }
 
+
+    public String getArticleName() {
+        return articleName;
+    }
+
+    public String getArticleTheme() {
+        return articleTheme;
+    }
+
+    public void setArticleName(String articleName) {
+        this.articleName = articleName;
+    }
+
+    public void setArticleTheme(String articleTheme) {
+        this.articleTheme = articleTheme;
+    }
 
     public Integer getUserId() {
         return userId;

@@ -1,5 +1,8 @@
 package com.example.demo.config;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
 import com.example.demo.dao.UserRepository;
 import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 /**
  * 登录专用类
  * 自定义类，实现了UserDetailsService接口，用户登录时调用的第一类
@@ -41,6 +46,12 @@ public class MyCustomUserService implements UserDetailsService {
         tempuser.setLastLogin(ctime);
         tempuser.setOnline(true);
         userRepository.save(tempuser);
+
+        //定义权限列表.
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        // 用户可以访问的资源名称（或者说用户所拥有的权限） 注意：必须"ROLE_"开头
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
         myUserDetail.setUsername(tempuser.getUserName());
         myUserDetail.setPassword(tempuser.getPassWord());
         myUserDetail.setId(tempuser.getId());

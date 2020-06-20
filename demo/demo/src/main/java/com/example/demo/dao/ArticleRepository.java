@@ -93,8 +93,13 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //更新浏览记录
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO scanrecord(userid, articleid, scantime) VALUES (:id, :articleId,:scantime);" ,nativeQuery = true)
-    int addHistory(@Param("id") Integer id, @Param("articleId") Integer articleId,@Param("scantime")java.sql.Timestamp scantime);
+    @Query(value = "INSERT INTO scanrecord(userid, articleid, scantime, articlename, articletheme) " +
+            "VALUES (:id, :articleId,:scantime,:articlename, :articletheme);" ,nativeQuery = true)
+    int addHistory(@Param("id") Integer id, @Param("articleId") Integer articleId,
+                   @Param("scantime")java.sql.Timestamp scantime,
+                   @Param("articlename") String articlename,@Param("articletheme") String articletheme
+
+    );
     //add失败，更新时间
     @Modifying
     @Transactional
