@@ -40,6 +40,30 @@ public class Article implements Serializable {
     @Column(name = "iswithdrew")
     private Boolean isWithdrew;
 
+    public Integer getHot() {
+        return hot;
+    }
+
+    public void setHot(Integer hot) {
+        this.hot = hot;
+    }
+
+    //热度，隐藏属性,每次点赞，评论，收藏，浏览，点赞评论都会增加热度，
+    /*
+        热度具体设置：
+        搜索时根据排名+10~1
+        浏览+1
+        评论点赞+2
+        点赞+5
+        收藏+10
+        评论+20
+        每天0点变为原先的2/3
+
+
+     */
+    @Column(name = "hot")
+    private Integer hot;
+
     public Article() {
         super();
     }

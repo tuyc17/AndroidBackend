@@ -79,8 +79,8 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //发表文章
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO article(articlename, content, articletheme, authorid, iswithdrew, praisecount, publishtime) " +
-            "VALUES (:articlename,:content,:articletheme,:authorid,0,0,:publishtime);" ,nativeQuery = true)
+    @Query(value = "INSERT INTO article(articlename, content, articletheme, authorid, iswithdrew, praisecount, publishtime,hot) " +
+            "VALUES (:articlename,:content,:articletheme,:authorid,0,0,:publishtime,0);" ,nativeQuery = true)
     int publish(@Param("articlename") String articlename, @Param("content")String content,@Param("authorid") Integer authorid
             ,@Param("articletheme")String articletheme,@Param("publishtime")java.sql.Timestamp publishtime);
     //发表评论

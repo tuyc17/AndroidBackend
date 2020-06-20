@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import com.example.demo.config.WebSocketServer;
 
 import com.example.demo.dao.ArticleRepository;
 import com.example.demo.domain.User;
@@ -184,6 +185,7 @@ public class ArticleController {
     @PostMapping("/praiseArticle")
     @ResponseBody
     public Map<String, Object> praise(Integer articleId){
+//        WebSocketServer.sendInfo();
         MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
@@ -228,6 +230,8 @@ public class ArticleController {
                 //增加作者总赞数
                 author.setPraiseCount(author.getPraiseCount()+1);
                 userRepository.save(author);
+
+
             }
             catch (Exception e){
                 map.put("code", 402);

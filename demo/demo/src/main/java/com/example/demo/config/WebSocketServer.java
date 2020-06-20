@@ -15,10 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 
-/**
- * @author zhengkai.blog.csdn.net
- */
-@ServerEndpoint("/imserver/{userId}")
+
+@ServerEndpoint("/websocket/{userId}")
 @Component
 public class WebSocketServer {
 
@@ -47,14 +45,11 @@ public class WebSocketServer {
             addOnlineCount();
             //在线数加1
         }
-
-//        log.info("用户连接:"+userId+",当前在线人数为:" + getOnlineCount());
-//
-//        try {
-//            sendMessage("连接成功");
-//        } catch (IOException e) {
-//            log.error("用户:"+userId+",网络异常!!!!!!");
-//        }
+        try {
+            sendMessage("连接成功");
+        } catch (IOException e) {
+            System.out.println("连接出错！");
+        }
     }
 
     /**
@@ -67,46 +62,12 @@ public class WebSocketServer {
             //从set中删除
             subOnlineCount();
         }
-//        log.info("用户退出:"+userId+",当前在线人数为:" + getOnlineCount());
+        System.out.println("用户退出:"+userId+",当前在线人数为:" + getOnlineCount());
     }
 
-    /**
-     * 收到客户端消息后调用的方法
-     *
-     * @param message 客户端发送过来的消息*/
-    @OnMessage
-    public void onMessage(String message, Session session) {
-//        log.info("用户消息:"+userId+",报文:"+message);
-        //可以群发消息
-        //消息保存到数据库、redis
-        if(StringUtils.isNotBlank(message)){
-            try {
-                //解析发送的报文
-                JSONObject jsonObject = JSON.parseObject(message);
-                //追加发送人(防止串改)
-                jsonObject.put("fromUserId",this.userId);
-                String toUserId=jsonObject.getString("toUserId");
-                //传送给对应toUserId用户的websocket
-                if(StringUtils.isNotBlank(toUserId)&&webSocketMap.containsKey(toUserId)){
-                    webSocketMap.get(toUserId).sendMessage(jsonObject.toJSONString());
-                }else{
-//                    log.error("请求的userId:"+toUserId+"不在该服务器上");
-                    //否则不在这个服务器上，发送到mysql或者redis
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     *
-     * @param session
-     * @param error
-     */
     @OnError
     public void onError(Session session, Throwable error) {
-//        log.error("用户错误:"+this.userId+",原因:"+error.getMessage());
+        System.out.println("用户错误:"+this.userId+",原因:"+error.getMessage());
         error.printStackTrace();
     }
     /**
