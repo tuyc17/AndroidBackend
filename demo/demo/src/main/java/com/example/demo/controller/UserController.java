@@ -43,6 +43,8 @@ public class UserController {
             user.setFavoriteCount(0);
             userRepository.save(user);
             map.put("code", 200);
+
+
             return map;
         }
         else{
