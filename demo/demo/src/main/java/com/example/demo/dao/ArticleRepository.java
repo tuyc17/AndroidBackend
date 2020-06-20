@@ -109,7 +109,7 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     @Query(value = "select * from scanrecord where userid = :userid ",nativeQuery = true)
     List<Object[]> gethistory(@Param("userid") Integer userid);
 
-
-
-
+    //通过热度寻找所有文章
+    @Query(value = "select * from article ORDER BY hot DESC",nativeQuery = true)
+    List<Object[]> getArticleByHot();
 }

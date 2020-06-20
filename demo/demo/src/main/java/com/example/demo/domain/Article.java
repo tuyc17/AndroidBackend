@@ -58,8 +58,6 @@ public class Article implements Serializable {
         收藏+10
         评论+20
         每天0点变为原先的2/3
-
-
      */
     @Column(name = "hot")
     private Integer hot;
