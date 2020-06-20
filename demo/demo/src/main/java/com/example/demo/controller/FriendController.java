@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dao.FriendRepository;
 import com.example.demo.dao.UserRepository;
-import sun.util.calendar.BaseCalendar;
-import sun.util.calendar.LocalGregorianCalendar;
+// import sun.util.calendar.BaseCalendar;
+// import sun.util.calendar.LocalGregorianCalendar;
 
 @RestController
 @RequestMapping("friend")

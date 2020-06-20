@@ -1,5 +1,9 @@
 package com.example.demo.controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,9 +12,11 @@ import java.util.Map;
 import com.example.demo.dao.CommentRepository;
 import com.example.demo.domain.Article;
 import com.example.demo.domain.Comment;
-import com.sun.javafx.collections.MappingChange;
+// import com.sun.javafx.collections.MappingChange;
+import com.example.demo.search.IndexProcessor;
+import com.example.demo.search.Search;
 import org.apache.ibatis.annotations.Update;
-import org.omg.CORBA.MARSHAL;
+// import org.omg.CORBA.MARSHAL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,7 +39,22 @@ public class ArticleController {
     public Map<String, Object> publish(Integer id, String title, String content, String theme) {
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
-        articleRepository.publish(title, content, id, theme, ctime);
+        // TODO: 将文章内容content写进目录下
+        File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+id.toString()+".txt");
+        try {
+            contentDir.createNewFile();
+            FileWriter fwriter = new FileWriter(contentDir, false);
+            BufferedWriter bwriter = new BufferedWriter(fwriter);
+            bwriter.write(content);
+            bwriter.flush();
+            bwriter.close();
+            fwriter.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        // TODO: 将content路径插入表中
+        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+
         map.put("status", 200);
         return map;
     }
@@ -50,8 +71,15 @@ public class ArticleController {
     //TODO：编写热推文章算法，建议使用深度学习
     //获取热推文章
 
-    //TODO：编写文章搜索算法,建议使用模糊查询
-    //搜索文章
+    // TODO：编写文章搜索算法,建议使用模糊查询
+    // 搜索文章
+    @RequestMapping("/searchtest")
+    public void searchTest(String target) {
+        IndexProcessor pr = new  IndexProcessor();
+        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+        Search s = new Search();
+        s.indexSearch("content", target);//"卡特");
+    }
 
 
     //阅读特定文章

@@ -13,10 +13,10 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     User findByUserName(String userName);
-    //用学号查找
+    // 用学号查找
     User findBystudentId(String studentid);
 
-    //通过id获取某人的信息
+    // 通过id获取某人的信息
     @Query(value = "select isonline, isverified, lastlogin, nickname, studentid, username from user where id = :id",nativeQuery = true)
     List<Object[]> getRequest(@Param("id") Integer id);
 
