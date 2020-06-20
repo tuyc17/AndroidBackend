@@ -3,11 +3,8 @@ package com.example.demo.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 // 1,用户类，用于表示每个特定用户的基本信息
@@ -21,7 +18,7 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     // 用户id，主键，自增
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     // 姓名（如：涂亦驰）
     @Column(name = "username")
@@ -44,7 +41,15 @@ public class User implements Serializable {
     // 大V标识
     @Column(name = "isverified")
     private Boolean isVerified;
-
+    // 获得的赞数
+    @Column(name = "praisecount")
+    private Integer praiseCount;
+    // 获得的收藏数
+    @Column(name = "favoritecount")
+    private Integer favoriteCount;
+    // 头像
+    @Column(name = "avatar")
+    private Integer avatar;
     public User() {
         super();
     }
@@ -119,4 +124,26 @@ public class User implements Serializable {
         isVerified = verified;
     }
 
+    public Integer getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Integer avatar) {
+        this.avatar = avatar;
+    }
+    public Integer getFavoriteCount() {
+        return favoriteCount;
+    }
+
+    public void setFavoriteCount(Integer favoriteCount) {
+        this.favoriteCount = favoriteCount;
+    }
+
+    public Integer getPraiseCount() {
+        return praiseCount;
+    }
+
+    public void setPraiseCount(Integer praiseCount) {
+        this.praiseCount = praiseCount;
+    }
 }

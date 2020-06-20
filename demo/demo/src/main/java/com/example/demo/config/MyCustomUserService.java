@@ -23,12 +23,13 @@ public class MyCustomUserService implements UserDetailsService {
      * 并返回UserDetails放到spring的全局缓存SecurityContextHolder中，以供授权器使用
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String studentid) throws UsernameNotFoundException {
         //在这里可以自己调用数据库，对username进行查询，看看在数据库中是否存在
         MyUserDetails myUserDetail = new MyUserDetails();
+        java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
         User tempuser;
         try {
-            tempuser = userRepository.findBystudentId(username);
+            tempuser = userRepository.findBystudentId(studentid);
         }
         catch (Exception e){
             throw new UsernameNotFoundException("not found");
@@ -36,6 +37,10 @@ public class MyCustomUserService implements UserDetailsService {
         if (tempuser==null){
             throw new UsernameNotFoundException("not found");
         }
+        //此处设置isonline,lastlogin
+        tempuser.setLastLogin(ctime);
+        tempuser.setOnline(true);
+        userRepository.save(tempuser);
         myUserDetail.setUsername(tempuser.getUserName());
         myUserDetail.setPassword(tempuser.getPassWord());
         myUserDetail.setId(tempuser.getId());

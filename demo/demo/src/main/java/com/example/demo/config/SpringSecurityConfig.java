@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.example.demo.dao.UserRepository;
+import com.example.demo.domain.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -49,6 +52,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     private MyPasswordEncoder myPasswordEncoder;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -125,6 +130,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                     map.put("message","退出成功");
                     map.put("data",authentication);
                     response.setContentType("application/json;charset=utf-8");
+
+                    //此处设置下线
+                    //此处设置isonline,lastlogin
+                    MyUserDetails myUserDetails = (MyUserDetails)authentication.getPrincipal();
+                    User tempuser;
+                    try {
+                        tempuser = userRepository.findBystudentId(myUserDetails.getUsername());
+                    }
+                    catch (Exception e){
+                        throw new UsernameNotFoundException("not found");
+                    }
+                    tempuser.setOnline(false);
+                    userRepository.save(tempuser);
                     PrintWriter out = response.getWriter();
                     out.write(objectMapper.writeValueAsString(map));
                     out.flush();
