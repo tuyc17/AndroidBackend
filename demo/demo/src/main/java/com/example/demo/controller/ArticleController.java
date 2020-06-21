@@ -26,7 +26,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.demo.config.WebSocketServer;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dao.ArticleRepository;
 import com.example.demo.domain.User;
@@ -672,7 +676,27 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
-
+    //上传文件
+//    @PostMapping("/upload")
+//    @ResponseBody
+//    public Map<String, Object> handleFormUpload(@RequestParam("file") MultipartFile file
+//                            ,Integer articleId) {
+//        try{
+//            if (!file.isEmpty()) {
+//                byte[] bytes = file.getBytes();
+//                File picture = new File("downloadfile"+File.separator+articleId.toString());//这里指明上传文件保存的地址
+//                FileOutputStream fos = new FileOutputStream(picture);
+//                BufferedOutputStream bos = new BufferedOutputStream(fos);
+//                bos.write(bytes);
+//                bos.close();
+//                fos.close();
+//                return "success";
+//            }
+//        }catch (IOException e){
+//            System.out.println(e);
+//        }
+//        return "failed";
+//    }
     // 每天零点调用的函数，让热度下降1/3
     //每天0：00执行
     @Scheduled(cron = "0 00 00 ? * *")
