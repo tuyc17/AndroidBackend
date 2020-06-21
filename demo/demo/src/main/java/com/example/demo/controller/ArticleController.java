@@ -1,9 +1,7 @@
 package com.example.demo.controller;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,12 +66,13 @@ public class ArticleController {
         // File contentDir = new File("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content\\"+articleId.toString()+".txt");
         try {
             contentDir.createNewFile();
-            FileWriter fwriter = new FileWriter(contentDir, false);
-            BufferedWriter bwriter = new BufferedWriter(fwriter);
+            // 指定UTF_8编码防止乱码
+            BufferedWriter bwriter = new BufferedWriter(
+                    new OutputStreamWriter(
+                            new FileOutputStream(contentDir, false), StandardCharsets.UTF_8));
             bwriter.write(content);
             bwriter.flush();
             bwriter.close();
-            fwriter.close();
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -150,6 +149,10 @@ public class ArticleController {
         Article article;
         try {
             article = articleRepository.findById(articleId).get();
+            // 获取article中记录的文本保存路径，在该路径中打开文件获取内容，写入setContent()中，但是不能save！
+            String path = article.getContent();
+
+            article.setContent("卡特琳娜");
             map.put("article", article);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
         }
         catch (Exception e) {
