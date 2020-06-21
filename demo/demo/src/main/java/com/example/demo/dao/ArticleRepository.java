@@ -1,16 +1,15 @@
 package com.example.demo.dao;
 
-import com.example.demo.domain.Friend;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.domain.Article;
-import com.example.demo.domain.ArticlePraise;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //TODO：编写热推文章算法，建议使用深度学习
@@ -114,4 +113,9 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //通过热度寻找所有文章
     @Query(value = "select * from article ORDER BY hot DESC",nativeQuery = true)
     List<Object[]> getArticleByHot();
+
+//    // 通过主键id寻找文章
+//    // @Query(value = "select * from article where id = :id", nativeQuery = true)
+//    Optional<Article> findById(Integer id);
+
 }

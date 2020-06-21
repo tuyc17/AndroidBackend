@@ -27,7 +27,7 @@ public class Article implements Serializable {
     // 作者id（User.id）
     @Column(name = "authorid")
     private Integer authorId;
-    // 文章内容
+    // 文章内容保存路径
     @Column(name = "content")
     private String content;
     // 点赞数

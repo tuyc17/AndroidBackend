@@ -14,7 +14,7 @@ import org.apache.lucene.search.TermQuery;
 public class Search {
     private String INDEX_STORE_PATH = "src\\main\\java\\com\\example\\demo\\search\\index";
 
-    // 利用lucene索引搜索（被搜查的对象：searchKey）（进阶修改：将searchKey改为一个List）
+    // 利用lucene索引搜索（被搜查的对象：searchLit）（返回对象：由文章的id按匹配数从大到小排序的长度不超过20的listRet）
     public List indexSearch(String searchType, List<String> searchList) {
         System.out.println("##使用索引方式搜索##");
         System.out.println("======================");
@@ -59,17 +59,25 @@ public class Search {
             }
         }
         // result转化为list形式并排序
-        List<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>(result.entrySet()); //转换为list
-        list.sort(new Comparator<Map.Entry<String, Integer>>() {
+        List<Map.Entry<String, Integer>> listTmp = new ArrayList<Map.Entry<String, Integer>>(result.entrySet()); //转换为list
+        listTmp.sort(new Comparator<Map.Entry<String, Integer>>() {
             @Override
             public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
                 return o2.getValue().compareTo(o1.getValue());
             }
         });
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i).getKey() + ": " + list.get(i).getValue());
+        // 将listTmp的前若干个（这个若干待定，暂定为20），写入返回list<Integer id>中
+        List<Integer> listRet = new ArrayList<Integer>();
+        for (int i = 0; i < listTmp.size() && i < 20; i++) {
+            // 将1.txt(String)转化为1(Integer)
+            String content = listTmp.get(i).getKey();
+            int dot = content.lastIndexOf('.');
+            String cut = content.substring(0, dot);
+            listRet.add(Integer.valueOf(cut));
+            // System.out.println(content + ": " + cut);
         }
-        return list;
+        System.out.println(listRet);
+        return listRet;
     }
 
 
