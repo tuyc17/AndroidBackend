@@ -4,7 +4,7 @@ package com.example.demo.dao;
 //import org.mybatis.spring.annotation.MapperScan;
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.domain.User;
