@@ -1,5 +1,5 @@
 package com.example.demo.dao;
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.sql.Date;

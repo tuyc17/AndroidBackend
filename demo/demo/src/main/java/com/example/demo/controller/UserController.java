@@ -38,7 +38,7 @@ public class UserController {
             user.setUserName(username);
             user.setStudentId(studentId);
             user.setPassWord(password);
-            user.setAvatar(0);
+            user.setAvatar(2131165277);
             user.setPraiseCount(0);
             user.setFavoriteCount(0);
             userRepository.save(user);

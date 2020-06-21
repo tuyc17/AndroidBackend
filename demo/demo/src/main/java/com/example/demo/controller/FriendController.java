@@ -106,7 +106,7 @@ public class FriendController {
         temp.setUserId(id);
         temp.setFriendId(friendId);
         if (!friendRepository.exists(Example.of(temp))){
-            friendRepository.addFriend(id,friendId);
+            friendRepository.save(temp);
             map.put("code", 200);
         }
         else {
@@ -154,7 +154,6 @@ public class FriendController {
             map.put("code", 201);
         }
         else {
-            friendRepository.deleteFriend(id,friendId);
             map.put("code", 200);
         }
         return map;
@@ -173,7 +172,6 @@ public class FriendController {
             map.put("code", 201);
         }
         else {
-            friendRepository.deleteFriend(id,friendId);
             map.put("code", 200);
         }
         return map;

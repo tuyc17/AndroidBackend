@@ -50,7 +50,6 @@ public class ArticleController {
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
 
-        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
 
         // 将文章内容content写进目录下
         Article article = new Article();
@@ -61,8 +60,10 @@ public class ArticleController {
         article.setPublishTime(ctime);
         article.setArticleTheme(theme);
         articleRepository.save(article);
+        article.setContent(article.getId().toString()+".txt");
+        articleRepository.save(article);
         Integer articleId = article.getId();
-        File contentDir = new File(File.separator+"search"+File.separator+"content"+File.separator+articleId.toString()+".txt");
+        File contentDir = new File("search"+File.separator+"content"+File.separator+articleId.toString()+".txt");
         // File contentDir = new File("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content\\"+articleId.toString()+".txt");
         try {
             contentDir.createNewFile();
@@ -120,7 +121,7 @@ public class ArticleController {
         targetList.add(target.substring(target.length()-2));
 
         IndexProcessor pr = new  IndexProcessor();
-        pr.createIndex(File.separator+"search" + File.separator + "content");
+        pr.createIndex("search" + File.separator + "content");
         // pr.createIndex("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content");
         Search s = new Search();
         List<Integer> tempret = s.indexSearch("content", targetList);
