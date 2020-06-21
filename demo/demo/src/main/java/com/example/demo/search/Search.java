@@ -12,7 +12,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 
 public class Search {
-    private String INDEX_STORE_PATH = "src\\main\\java\\com\\example\\demo\\search\\index";
+    private String INDEX_STORE_PATH = File.separator + "search" + File.separator + "index";
+    // private String INDEX_STORE_PATH = "D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\index";
 
     // 利用lucene索引搜索（被搜查的对象：searchLit）（返回对象：由文章的id按匹配数从大到小排序的长度不超过20的listRet）
     public List indexSearch(String searchType, List<String> searchList) {
@@ -90,7 +91,7 @@ public class Search {
 ////        searchWords.add("英雄");
 ////        s.indexSearch("content", searchWords);//"卡特");
 //        // 尝试将String分解为List<String>
-//        String target = "米兰大公、枢机卿、教皇厅国务圣省长官";
+//        String target = "卡特";
 //        List<String> targetList = new ArrayList<String>();
 //        for(int i = 0; i + 2 < target.length(); i++) {
 //            targetList.add(target.substring(i, i+2));
@@ -98,7 +99,8 @@ public class Search {
 //        targetList.add(target.substring(target.length()-2));
 //
 //        IndexProcessor pr = new  IndexProcessor();
-//        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+//        // pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+//        pr.createIndex("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content");
 //        Search s = new Search();
 //        System.out.println(s.indexSearch("content", targetList));
 //    }

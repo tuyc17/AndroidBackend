@@ -14,7 +14,8 @@ import jeasy.analysis.MMAnalyzer;
 
 public class IndexProcessor {
     // 索引存储目录
-    private String INDEX_STORE_PATH = "src\\main\\java\\com\\example\\demo\\search\\index";
+    private String INDEX_STORE_PATH = File.separator + "search" + File.separator + "index";
+    // private String INDEX_STORE_PATH = "D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\index";
     // 创建索引
     public void createIndex(String inputDir){
         try {

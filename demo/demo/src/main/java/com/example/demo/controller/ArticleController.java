@@ -51,6 +51,9 @@ public class ArticleController {
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
+
+        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+
         // 将文章内容content写进目录下
         Article article = new Article();
         article.setPraiseCount(0);
@@ -61,7 +64,8 @@ public class ArticleController {
         article.setArticleTheme(theme);
         articleRepository.save(article);
         Integer articleId = article.getId();
-        File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+articleId.toString()+".txt");
+        File contentDir = new File(File.separator+"search"+File.separator+"content"+File.separator+articleId.toString()+".txt");
+        // File contentDir = new File("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content\\"+articleId.toString()+".txt");
         try {
             contentDir.createNewFile();
             FileWriter fwriter = new FileWriter(contentDir, false);
@@ -70,14 +74,11 @@ public class ArticleController {
             bwriter.flush();
             bwriter.close();
             fwriter.close();
-        } catch(Exception e) {
+        }
+        catch(Exception e) {
             e.printStackTrace();
         }
-        // 将content路径插入表中
-//        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
-        article.setContent(articleId.toString()+".txt");
-        articleRepository.save(article);
-        map.put("status", 200);
+        map.put("code", 200);
         return map;
     }
 
@@ -120,7 +121,8 @@ public class ArticleController {
         targetList.add(target.substring(target.length()-2));
 
         IndexProcessor pr = new  IndexProcessor();
-        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+        pr.createIndex(File.separator+"search" + File.separator + "content");
+        // pr.createIndex("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content");
         Search s = new Search();
         List<Integer> tempret = s.indexSearch("content", targetList);
         List<Article> ret = new ArrayList();
@@ -149,7 +151,8 @@ public class ArticleController {
         try {
             article = articleRepository.findById(articleId).get();
             map.put("article", article);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             map.put("code", 400);
             map.put("msg", "错误：文章不存在");
             return map;
