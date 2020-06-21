@@ -66,14 +66,16 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     @Query(value = "DELETE from favorite WHERE (userid = :id) and (articleid = :articleId);" ,nativeQuery = true)
     int cancelFavorite(@Param("id") Integer id,@Param("articleId") Integer articleId);
     //查询特定版块文章
-    @Query(value = "select * from article where (articletheme = :articletheme)",nativeQuery = true)
+    @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
+            " from article where (articletheme = :articletheme)",nativeQuery = true)
     List<Object[]> getArticleByTheme(@Param("articletheme") String articletheme);
     //查询用户收藏夹内容
     @Query(value = "select articleid from favorite where (userid = :userid)",nativeQuery = true)
     List<Integer> getArticleByFavorite(@Param("userid") Integer userid);
     //查询特定文章信息
     //查询文章的评论
-    @Query(value = "select * from comment where (farticleid = :farticleid)",nativeQuery = true)
+    @Query(value = "select id, authorid, content, farticleid, fcommentid, praisecount, publish_time" +
+            " from comment where (farticleid = :farticleid)",nativeQuery = true)
     List<Object[]> getCommentByArticle(@Param("farticleid") Integer farticleid);
 
     //发表文章
@@ -106,10 +108,16 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     @Query(value = "UPDATE scanrecord SET  scantime = :scantime WHERE (userid = :id) and (articleid = :articleId);" ,nativeQuery = true)
     int changeHistory(@Param("id") Integer id,@Param("articleId") Integer articleId,@Param("scantime")java.sql.Timestamp scantime);
     //查询所有浏览记录
-    @Query(value = "select * from scanrecord where userid = :userid ",nativeQuery = true)
+    @Query(value = "select userid, articleid, scantime, articlename, articletheme" +
+            " from scanrecord where userid = :userid ",nativeQuery = true)
     List<Object[]> gethistory(@Param("userid") Integer userid);
 
     //通过热度寻找所有文章
-    @Query(value = "select * from article ORDER BY hot DESC",nativeQuery = true)
+    @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
+            " from article ORDER BY hot DESC",nativeQuery = true)
     List<Object[]> getArticleByHot();
+    // 获取某人的所有文章
+    @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
+            " from article where authorid = :id",nativeQuery = true)
+    List<Object[]> getArticleById(@Param("id") Integer id);
 }

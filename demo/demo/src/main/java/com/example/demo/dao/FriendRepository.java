@@ -13,14 +13,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface FriendRepository extends JpaRepository<Friend, Integer> {
-    // 获取所有好友
+
+
+    // 获取所有关注的人
     @Query(value = "select friendid from friend where userid = :id",nativeQuery = true)
     List<Integer> getAllFriend(@Param("id") Integer id);
+
+    // 获取所有关注你的人
+    @Query(value = "select userid from friend where friendid = :id",nativeQuery = true)
+    List<Integer> getAllFriended(@Param("id") Integer id);
+
     // 判断某人是否为好友
     @Query(value = "select * from friend where userid = :id and friendid = :friendId",nativeQuery = true)
     List<Object[]> isFriend(@Param("id") Integer id,@Param("friendId") Integer friendId);
     // 拿聊天记录
-    @Query(value = "select * from chatrecord where (senderid = :id and receiverid = :friendId)or(senderid = :friendId and receiverid = :id)",nativeQuery = true)
+    @Query(value = "select id, content, isread, receiverid, sendtime, senderid" +
+            " from chatrecord where (senderid = :id and receiverid = :friendId)or(senderid = :friendId and receiverid = :id)",nativeQuery = true)
     List<Object[]> getMsg(@Param("id") Integer id,@Param("friendId") Integer friendId);
     // 拿聊天记录同时记得update信息为已读
 
@@ -58,6 +66,7 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
     @Query(value = "UPDATE friendrequest SET  ishandled = 0, isrejected = 1 WHERE (userid = :id) and (targetid = :friendId);" ,nativeQuery = true)
     int rejectRequest(@Param("id") Integer id,@Param("friendId") Integer friendId);
     // 获取当前未处理的好友请求
-    @Query(value = "select * from friendrequest where targetid = :id  and ishandled = 0",nativeQuery = true)
+    @Query(value = "select userid, targetid, ishandled, isrejected, rejecttime, requesttime" +
+            " from friendrequest where targetid = :id  and ishandled = 0",nativeQuery = true)
     List<Object[]> getRequest(@Param("id") Integer id);
 }

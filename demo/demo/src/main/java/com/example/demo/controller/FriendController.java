@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.Date;
 
 import com.example.demo.config.MyUserDetails;
+import com.example.demo.domain.Friend;
 import com.example.demo.domain.User;
 import com.example.demo.domain.ChatRecord;
 
 import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,10 +31,28 @@ public class FriendController {
     @Autowired
     private UserRepository userRepository;
 
-    //获取所有好友信息
-    @GetMapping("/all")
+    //获取所有关注你的人的信息
+    @GetMapping("/follower")
     @ResponseBody
     public Map<String, Object> getFriend() {
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        List<User> retUser = new ArrayList<>();
+        List<Integer> friendList = friendRepository.getAllFriended(id);
+        for (Integer integer : friendList) {
+            //一定要findByID后get，不能getOne，不然类型不对，我也不知道为啥，试出来的
+            User tempUser = userRepository.findById(integer).get();
+            retUser.add(tempUser);
+        }
+        map.put("follower", retUser);
+        map.put("code", 200);
+        return map;
+    }
+    // 获取所有你关注的人
+    @GetMapping("/following")
+    @ResponseBody
+    public Map<String, Object> getFriend2() {
         MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
@@ -43,11 +63,10 @@ public class FriendController {
             User tempUser = userRepository.findById(integer).get();
             retUser.add(tempUser);
         }
-        map.put("friends", retUser);
+        map.put("following", retUser);
         map.put("code", 200);
         return map;
     }
-
     // 获取特定聊天信息
     @GetMapping("/msg")
     @ResponseBody
@@ -76,89 +95,23 @@ public class FriendController {
         map.put("code", 200);
         return map;
     }
-    // 添加好友
-    // 接受添加好友请求
-    @PostMapping("/add")
+    //关注/取关
+    @PostMapping("/follow")
     @ResponseBody
-    public Map<String, Object> addFriend(Integer friendId){
+    public Map<String, Object> follow(Integer friendId){
         MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
-        int code;
-        // 先把好友请求列表中的内容置为已处理
-        try {
-            code = friendRepository.admitRequest(id,friendId);
-        }
-        catch (Exception e){
-            code = -1;
-        }
-        if (code != 1){
-            map.put("code", 400);
-            map.put("msg", "好友请求接受失败");
-            return map;
-        }
-
-        try {
-            code = friendRepository.addFriend(id,friendId)+friendRepository.addFriend(friendId,id);
-        }
-        catch (Exception e){
-            code = -1;
-        }
-
-        if (code != 2){
-            map.put("code", 401);
-            map.put("msg", "已添加此人为好友，前端疑似出错！");
-            return map;
-        }
-        map.put("code", 200);
-        return map;
-    }
-    // 拒绝好友添加请求
-    @PostMapping("/reject")
-    @ResponseBody
-    public Map<String, Object> rejectFriend(Integer friendId){
-        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
-        Integer id = myUserDetails.getId();
-        Map<String, Object> map = new HashMap<>();
-        int code;
-        // 先把好友请求列表中的内容置为已处理
-        try {
-            code = friendRepository.rejectRequest(id,friendId);
-        }
-        catch (Exception e){
-            code = -1;
-        }
-        if (code == 1){
+        Friend temp = new Friend();
+        temp.setUserId(id);
+        temp.setFriendId(friendId);
+        if (!friendRepository.exists(Example.of(temp))){
+            friendRepository.addFriend(id,friendId);
             map.put("code", 200);
         }
-        else{
-            map.put("code", 400);
-            map.put("msg", "好友请求拒绝失败");
-            return map;
-        }
-        return map;
-    }
-    // 删除好友
-    @PostMapping("/delete")
-    @ResponseBody
-    public Map<String, Object> deleteFriend(Integer friendId){
-        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
-        Integer id = myUserDetails.getId();
-        Map<String, Object> map = new HashMap<>();
-        int code;
-        try {
-            code = friendRepository.deleteFriend(id,friendId)+friendRepository.deleteFriend(friendId,id);
-        }
-        catch (Exception e){
-            code = -1;
-        }
-
-        if (code == 2){
-            map.put("code", 200);
-        }
-        else{
-            map.put("code", 400);
-            map.put("msg", "此人已被删除，前端疑似出错！");
+        else {
+            friendRepository.deleteFriend(id,friendId);
+            map.put("code", 201);
         }
         return map;
     }
@@ -187,55 +140,42 @@ public class FriendController {
         }
         return map;
     }
-    // 发送添加好友请求
-    @PostMapping("/request")
+    // 返回用户是否关注某人
+    @GetMapping("/follow")
     @ResponseBody
-    public Map<String, Object> sendRequest(Integer friendId,String content){
+    public Map<String, Object> isFollow(Integer friendId){
         MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
-        java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
-        int code;
-        try {
-            code =  friendRepository.sendRequest(id,friendId,ctime,content);
+        Friend temp = new Friend();
+        temp.setUserId(id);
+        temp.setFriendId(friendId);
+        if (!friendRepository.exists(Example.of(temp))){
+            map.put("code", 201);
         }
-        catch (Exception e){
-            code = -1;
-        }
-
-        if (code == 1){
+        else {
+            friendRepository.deleteFriend(id,friendId);
             map.put("code", 200);
-        }
-        else{
-            map.put("code", 400);
-            map.put("msg", "发送添加请求失败");
         }
         return map;
     }
-    // 获取当前好友请求
-    @GetMapping("/request")
+    // 返回用户是否被某人关注
+    @GetMapping("/followed")
     @ResponseBody
-    public Map<String, Object> getRequest() {
+    public Map<String, Object> isFollowed(Integer friendId){
         MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
-        List<Object[]> retRequest;
-        List<Map<String, Object>> ret = new ArrayList<>();
-        retRequest = friendRepository.getRequest(id);
-        // TODO:记得把聊天信息的未读更新
-        //下面转换一下格式
-        String[] strList = {"userid", "targetid", "ishandled", "isrejected", "rejecttime", "requesttime", "verifyinfo"};
-        for (Object[] request : retRequest) {
-            Map<String, Object> temp = new HashMap<>();
-            for (int i = 0; i < strList.length; i++) {
-                if (request[i] != null) {
-                    temp.put(strList[i], request[i]);
-                }
-            }
-            ret.add(temp);
+        Friend temp = new Friend();
+        temp.setUserId(friendId);
+        temp.setFriendId(id);
+        if (!friendRepository.exists(Example.of(temp))){
+            map.put("code", 201);
         }
-        map.put("requestlist", ret);
-        map.put("code", 200);
+        else {
+            friendRepository.deleteFriend(id,friendId);
+            map.put("code", 200);
+        }
         return map;
     }
 }

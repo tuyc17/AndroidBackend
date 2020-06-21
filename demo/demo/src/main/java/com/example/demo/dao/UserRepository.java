@@ -17,7 +17,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User findBystudentId(String studentid);
 
     //通过id获取某人的信息
-    @Query(value = "select * from user where id = :id",nativeQuery = true)
+    @Query(value = "select id, isonline, isverified, lastlogin, nickname, " +
+            "password, studentid, username, avatar, favoritecount, praisecount from user where id = :id",nativeQuery = true)
     List<Object[]> getInfo(@Param("id") Integer id);
 
     //用户注册

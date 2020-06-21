@@ -10,9 +10,11 @@ import com.example.demo.dao.CommentRepository;
 import com.example.demo.dao.UserRepository;
 import com.example.demo.domain.Article;
 import com.example.demo.domain.Comment;
+import com.example.demo.domain.Friend;
 import com.sun.javafx.collections.MappingChange;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,6 +26,7 @@ import com.example.demo.config.WebSocketServer;
 import com.example.demo.dao.ArticleRepository;
 import com.example.demo.domain.User;
 import org.springframework.scheduling.annotation.Scheduled;
+
 @RestController
 @RequestMapping("article")
 public class ArticleController {
@@ -424,8 +427,9 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
     // 热搜功能，推荐5个最热文章
-    @GetMapping("/got")
+    @GetMapping("/hot")
     @ResponseBody
     public Map<String, Object> getByHot() {
         Map<String, Object> map = new HashMap<>();
@@ -445,8 +449,8 @@ public class ArticleController {
                 }
             }
             ret.add(temp);
-            index+=1;
-            if (index==5){
+            index += 1;
+            if (index == 5) {
                 break;
             }
         }
@@ -454,13 +458,124 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
+    //获取某人的所有文章
+    @GetMapping("/person")
+    @ResponseBody
+    public Map<String, Object> getByPerson(Integer id) {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (id == -1) {
+            //表示拿自己的文章
+            id = myUserDetails.getId();
+        }
+        Map<String, Object> map = new HashMap<>();
+        List<Object[]> objectLists;
+        List<Map<String, Object>> ret = new ArrayList<>();
+
+        objectLists = articleRepository.getArticleById(id);
+        //下面转换一下格式
+        String[] strList = {"id", "articlename", "articletheme", "authorid",
+                "content", "iswithdrew", "praisecount", "publishtime"};
+        int index = 0;
+        for (Object[] record : objectLists) {
+            Map<String, Object> temp = new HashMap<>();
+            for (int i = 0; i < strList.length; i++) {
+                if (record[i] != null) {
+                    temp.put(strList[i], record[i]);
+                }
+            }
+            ret.add(temp);
+            index += 1;
+            if (index == 5) {
+                break;
+            }
+        }
+        map.put("articles", ret);
+        map.put("code", 200);
+        return map;
+    }
+    // 返回文章是否被点赞
+    @GetMapping("/ispraised")
+    @ResponseBody
+    public Map<String, Object> isPraised(Integer articleId){
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        //判断文章是否被此人点赞过
+        List<Object[]> temp;
+        try {
+            temp = articleRepository.isPraised(id, articleId);
+        } catch (Exception e) {
+            map.put("code", 401);
+            map.put("msg", "查询点赞出错");
+            return map;
+        }
+        if (temp.size()==0){
+            map.put("code", 200);
+            return map;
+        }
+        else{
+            map.put("code", 201);
+            return map;
+        }
+    }
+    // 返回文章是否被收藏
+    @GetMapping("/isfavorited")
+    @ResponseBody
+    public Map<String, Object> isfavorited(Integer articleId){
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        //判断文章是否被收藏
+        List<Object[]> temp;
+        try {
+            temp = articleRepository.isFavorite(id, articleId);
+        } catch (Exception e) {
+            map.put("code", 401);
+            map.put("msg", "查询收藏出错");
+            return map;
+        }
+        if (temp.size()==0){
+            map.put("code", 200);
+            return map;
+        }
+        else{
+            map.put("code", 201);
+            return map;
+        }
+    }
+    // 返回评论是否被点赞
+    @GetMapping("/commentispraised")
+    @ResponseBody
+    public Map<String, Object> commentIsPraised(Integer commentId){
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        //判断文章是否被收藏
+        List<Object[]> temp;
+        try {
+            temp = articleRepository.isPraisedComment(id, commentId);
+        } catch (Exception e) {
+            map.put("code", 401);
+            map.put("msg", "查询收藏出错");
+            return map;
+        }
+        if (temp.size()==0){
+            map.put("code", 200);
+            return map;
+        }
+        else{
+            map.put("code", 201);
+            return map;
+        }
+    }
     // 每天零点调用的函数，让热度下降1/3
     //每天0：00执行
     @Scheduled(cron = "0 00 00 ? * *")
-    public void hotDecrease(){
+    public void hotDecrease() {
         List<Article> articles = articleRepository.findAll();
-        for (Article article: articles) {
-            article.setHot(article.getHot()*2/3);
+        for (Article article : articles) {
+            article.setHot(article.getHot() * 2 / 3);
             articleRepository.save(article);
         }
     }
