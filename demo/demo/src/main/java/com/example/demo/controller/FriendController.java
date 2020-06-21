@@ -176,4 +176,17 @@ public class FriendController {
         }
         return map;
     }
+    @GetMapping("/followingcount")
+    @ResponseBody
+    public Map<String, Object> getAllFriendCount() {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer id= myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        Integer ret = friendRepository.getAllFriendCount(id);
+        //下面转换一下格式
+        map.put("count", ret);
+        map.put("code", 200);
+        return map;
+    }
+
 }

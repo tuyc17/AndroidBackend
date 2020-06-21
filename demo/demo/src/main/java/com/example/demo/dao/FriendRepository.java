@@ -18,6 +18,9 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
     // 获取所有关注的人
     @Query(value = "select friendid from friend where userid = :id",nativeQuery = true)
     List<Integer> getAllFriend(@Param("id") Integer id);
+    // 关注了多少人
+    @Query(value = "select count(*) from friend where userid = :id",nativeQuery = true)
+    Integer getAllFriendCount(@Param("id") Integer id);
 
     // 获取所有关注你的人
     @Query(value = "select userid from friend where friendid = :id",nativeQuery = true)
@@ -49,24 +52,24 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
     @Transactional
     @Query(value = "INSERT INTO chatrecord(senderid, receiverid, content, isread, sendtime) VALUES (:id, :friendId,:content,1,:sendtime);" ,nativeQuery = true)
     int sendMsg(@Param("id") Integer id,@Param("friendId") Integer friendId,@Param("content") String content,@Param("sendtime")java.sql.Timestamp sendtime);
-    // 发送添加好友请求
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO friendrequest(userid, targetid, ishandled, isrejected, requesttime, verifyinfo) VALUES (:id,:friendId,0,0,:sendtime,:verifyinfo);" ,nativeQuery = true)
-    int sendRequest(@Param("id") Integer id,@Param("friendId") Integer friendId,@Param("sendtime")java.sql.Timestamp sendtime,@Param("verifyinfo") String verifyinfo);
-
-    // 接受添加好友请求
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE friendrequest SET  ishandled = 1, isrejected = 0 WHERE (userid = :friendId) and (targetid = :id);" ,nativeQuery = true)
-    int admitRequest(@Param("id") Integer id,@Param("friendId") Integer friendId);
-    // 拒绝添加好友请求
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE friendrequest SET  ishandled = 0, isrejected = 1 WHERE (userid = :id) and (targetid = :friendId);" ,nativeQuery = true)
-    int rejectRequest(@Param("id") Integer id,@Param("friendId") Integer friendId);
-    // 获取当前未处理的好友请求
-    @Query(value = "select userid, targetid, ishandled, isrejected, rejecttime, requesttime" +
-            " from friendrequest where targetid = :id  and ishandled = 0",nativeQuery = true)
-    List<Object[]> getRequest(@Param("id") Integer id);
+//    // 发送添加好友请求
+//    @Modifying
+//    @Transactional
+//    @Query(value = "INSERT INTO friendrequest(userid, targetid, ishandled, isrejected, requesttime, verifyinfo) VALUES (:id,:friendId,0,0,:sendtime,:verifyinfo);" ,nativeQuery = true)
+//    int sendRequest(@Param("id") Integer id,@Param("friendId") Integer friendId,@Param("sendtime")java.sql.Timestamp sendtime,@Param("verifyinfo") String verifyinfo);
+//
+//    // 接受添加好友请求
+//    @Modifying
+//    @Transactional
+//    @Query(value = "UPDATE friendrequest SET  ishandled = 1, isrejected = 0 WHERE (userid = :friendId) and (targetid = :id);" ,nativeQuery = true)
+//    int admitRequest(@Param("id") Integer id,@Param("friendId") Integer friendId);
+//    // 拒绝添加好友请求
+//    @Modifying
+//    @Transactional
+//    @Query(value = "UPDATE friendrequest SET  ishandled = 0, isrejected = 1 WHERE (userid = :id) and (targetid = :friendId);" ,nativeQuery = true)
+//    int rejectRequest(@Param("id") Integer id,@Param("friendId") Integer friendId);
+//    // 获取当前未处理的好友请求
+//    @Query(value = "select userid, targetid, ishandled, isrejected, rejecttime, requesttime" +
+//            " from friendrequest where targetid = :id  and ishandled = 0",nativeQuery = true)
+//    List<Object[]> getRequest(@Param("id") Integer id);
 }

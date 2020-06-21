@@ -646,6 +646,33 @@ public class ArticleController {
             return map;
         }
     }
+    //获取收藏文章数
+    @GetMapping("/favoritecount")
+    @ResponseBody
+    public Map<String, Object> getArticleCountByFavorite() {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer id= myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        Integer ret = articleRepository.getArticleCountByFavorite(id);
+        //下面转换一下格式
+        map.put("count", ret);
+        map.put("code", 200);
+        return map;
+    }
+    //获取发表文章数
+    @GetMapping("/articlecount")
+    @ResponseBody
+    public Map<String, Object> getArticleByauthorid() {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer id= myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        Integer ret = articleRepository.getArticleCountByauthorid(id);
+        //下面转换一下格式
+        map.put("count", ret);
+        map.put("code", 200);
+        return map;
+    }
+
     // 每天零点调用的函数，让热度下降1/3
     //每天0：00执行
     @Scheduled(cron = "0 00 00 ? * *")

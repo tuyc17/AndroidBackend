@@ -121,7 +121,13 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
             " from article where authorid = :authorid",nativeQuery = true)
     List<Object[]> getArticleByauthorid(@Param("authorid") Integer authorid);
-
+    // 获取发表文章数
+    @Query(value = "select count(id)" +
+            " from article where authorid = :authorid",nativeQuery = true)
+    Integer getArticleCountByauthorid(@Param("authorid") Integer authorid);
+    // 获取收藏文章数
+    @Query(value = "select count(articleid) from favorite where (userid = :userid)",nativeQuery = true)
+    Integer getArticleCountByFavorite(@Param("userid") Integer userid);
 //    // 通过主键id寻找文章
 //    // @Query(value = "select * from article where id = :id", nativeQuery = true)
 //    Optional<Article> findById(Integer id);
