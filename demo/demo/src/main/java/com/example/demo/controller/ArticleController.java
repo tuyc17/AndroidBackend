@@ -531,7 +531,7 @@ public class ArticleController {
         List<Object[]> objectLists;
         List<Map<String, Object>> ret = new ArrayList<>();
 
-        objectLists = articleRepository.getArticleById(id);
+        objectLists = articleRepository.getArticleByauthorid(id);
         //下面转换一下格式
         String[] strList = {"id", "articlename", "articletheme", "authorid",
                 "content", "iswithdrew", "praisecount", "publishtime"};

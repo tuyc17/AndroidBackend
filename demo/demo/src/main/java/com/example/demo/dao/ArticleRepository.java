@@ -1,6 +1,6 @@
 package com.example.demo.dao;
 
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.domain.Article;
@@ -120,7 +120,7 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     // 获取某人的所有文章
     @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
             " from article where authorid = :authorid",nativeQuery = true)
-    List<Object[]> getArticleById(@Param("authorid") Integer authorid);
+    List<Object[]> getArticleByauthorid(@Param("authorid") Integer authorid);
 
 //    // 通过主键id寻找文章
 //    // @Query(value = "select * from article where id = :id", nativeQuery = true)
