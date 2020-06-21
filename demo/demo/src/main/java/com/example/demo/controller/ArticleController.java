@@ -153,7 +153,7 @@ public class ArticleController {
             // 获取article中记录的文本保存路径，在该路径中打开文件获取内容，写入setContent()中，但是不能save！
             String path = article.getContent();
             BufferedReader br = new BufferedReader(
-                    new FileReader(path));
+                    new FileReader("search" + File.separator + "content" + File.separator + path));
             String paragraph = null;
             String line = null;
             while((line = br.readLine()) != null) {
