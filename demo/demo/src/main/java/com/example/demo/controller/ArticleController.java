@@ -96,12 +96,20 @@ public class ArticleController {
 
     // TODO：编写文章搜索算法,建议使用模糊查询
     // 搜索文章
-    @RequestMapping("/searchtest")
-    public void searchTest(List<String> target) {
+    @RequestMapping("/search")
+    public List<Integer> search(String target) {
+        // 将String分解为List<String>
+        List<String> targetList = new ArrayList<String>();
+        for(int i = 0; i + 2 < target.length(); i++) {
+            targetList.add(target.substring(i, i+2));
+        }
+        targetList.add(target.substring(target.length()-2));
+
         IndexProcessor pr = new  IndexProcessor();
         pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
         Search s = new Search();
-        s.indexSearch("content", target);//"卡特");
+
+        return s.indexSearch("content", targetList);
     }
 
 

@@ -36,8 +36,8 @@ public class Search {
                     String file = searcher.getIndexReader().document(docs.doc()).getField("filename").stringValue();
                     Integer times = docs.freq();
 //                    // 在searcher.getIndexReader().document(docs.doc()).getField("filename").stringValue()文件中找到了docs.freq()次匹配
-//                    System.out.print("find " + times + " matches in " + file);
-//                    System.out.println("\n");
+                    //System.out.print("find " + times + " matches in " + file);
+                    // System.out.println("\n");
                     // 查找key是否存在
                     if (!result.containsKey(file)) {
                         // 不存在，新建
@@ -48,8 +48,8 @@ public class Search {
                     }
                 }
 //                // 遍历结束后result中存储了每个文件中获得的searchKey的匹配次数
-//                System.out.println(result);
-//                System.out.println("\n");
+                //System.out.println(result);
+                // System.out.println("\n");
 //            Date endTime = new Date();
 //            long timeofsearch = endTime.getTime() - beginTime.getTime();
 //            System.out.println("总耗时:" + timeofsearch);
@@ -81,14 +81,26 @@ public class Search {
     }
 
 
-    public static void main(String[] args) {
-        IndexProcessor pr = new  IndexProcessor();
-        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
-        Search s = new Search();
-        List<String> searchWords = new ArrayList<>();
-        searchWords.add("卡特");
-        searchWords.add("英雄");
-        s.indexSearch("content", searchWords);//"卡特");
-    }
+//    public static void main(String[] args) {
+////        IndexProcessor pr = new  IndexProcessor();
+////        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+////        Search s = new Search();
+////        List<String> searchWords = new ArrayList<>();
+////        searchWords.add("卡特");
+////        searchWords.add("英雄");
+////        s.indexSearch("content", searchWords);//"卡特");
+//        // 尝试将String分解为List<String>
+//        String target = "米兰大公、枢机卿、教皇厅国务圣省长官";
+//        List<String> targetList = new ArrayList<String>();
+//        for(int i = 0; i + 2 < target.length(); i++) {
+//            targetList.add(target.substring(i, i+2));
+//        }
+//        targetList.add(target.substring(target.length()-2));
+//
+//        IndexProcessor pr = new  IndexProcessor();
+//        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+//        Search s = new Search();
+//        System.out.println(s.indexSearch("content", targetList));
+//    }
 }
 
