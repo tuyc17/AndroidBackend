@@ -60,13 +60,26 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         //关闭跨域攻击防护
         http.csrf().disable();
         http.authenticationProvider(authenticationProvider());
+        http.httpBasic()
+                //未登录时，进行json格式的提示，很喜欢这种写法，不用单独写一个又一个的类
+                .authenticationEntryPoint((request,response,authException) -> {
+                    response.setContentType("application/json;charset=utf-8");
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    PrintWriter out = response.getWriter();
+                    Map<String,Object> map = new HashMap<String,Object>();
+                    map.put("code",403);
+                    map.put("message","未登录");
+                    out.write(objectMapper.writeValueAsString(map));
+                    out.flush();
+                    out.close();
+                });
         http
                 // .ignoring().antMatchers()
                 .authorizeRequests()
-                .antMatchers("/user/**", "/login", "/friend/**", "/article/**") // 不需要登录就可以访问
+                .antMatchers( "/login", "/user/logon") // 不需要登录就可以访问
                 .permitAll()
-                .antMatchers("/userOnly/**").hasAnyRole("USER") // 需要具有ROLE_USER角色才能访问
-                .antMatchers("/adminOnly/**").hasAnyRole("ADMIN") // 需要具有ROLE_ADMIN角色才能访问
+//                .antMatchers("/user/**","/friend/**","/article/**").hasAnyRole("USER") // 需要具有ROLE_USER角色才能访问
+//                .antMatchers("/adminOnly/**").hasAnyRole("ADMIN") // 需要具有ROLE_ADMIN角色才能访问
                 .anyRequest().authenticated()
 //                .and()
 //                .formLogin()
@@ -136,7 +149,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                     MyUserDetails myUserDetails = (MyUserDetails)authentication.getPrincipal();
                     User tempuser;
                     try {
-                        tempuser = userRepository.findBystudentId(myUserDetails.getUsername());
+                        tempuser = userRepository.findById(myUserDetails.getId()).get();
                     }
                     catch (Exception e){
                         throw new UsernameNotFoundException("not found");

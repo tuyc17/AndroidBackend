@@ -19,6 +19,7 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //搜索文章
 
 
+
     //文章点赞
     @Modifying
     @Transactional
@@ -80,8 +81,8 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //发表文章
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO article(articlename, content, articletheme, authorid, iswithdrew, praisecount, publishtime) " +
-            "VALUES (:articlename,:content,:articletheme,:authorid,0,0,:publishtime);" ,nativeQuery = true)
+    @Query(value = "INSERT INTO article(articlename, content, articletheme, authorid, iswithdrew, praisecount, publishtime,hot) " +
+            "VALUES (:articlename,:content,:articletheme,:authorid,0,0,:publishtime,0);" ,nativeQuery = true)
     int publish(@Param("articlename") String articlename, @Param("content")String content,@Param("authorid") Integer authorid
             ,@Param("articletheme")String articletheme,@Param("publishtime")java.sql.Timestamp publishtime);
     //发表评论
@@ -94,8 +95,13 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //更新浏览记录
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO scanrecord(userid, articleid, scantime) VALUES (:id, :articleId,:scantime);" ,nativeQuery = true)
-    int addHistory(@Param("id") Integer id, @Param("articleId") Integer articleId,@Param("scantime")java.sql.Timestamp scantime);
+    @Query(value = "INSERT INTO scanrecord(userid, articleid, scantime, articlename, articletheme) " +
+            "VALUES (:id, :articleId,:scantime,:articlename, :articletheme);" ,nativeQuery = true)
+    int addHistory(@Param("id") Integer id, @Param("articleId") Integer articleId,
+                   @Param("scantime")java.sql.Timestamp scantime,
+                   @Param("articlename") String articlename,@Param("articletheme") String articletheme
+
+    );
     //add失败，更新时间
     @Modifying
     @Transactional
@@ -105,7 +111,7 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     @Query(value = "select * from scanrecord where userid = :userid ",nativeQuery = true)
     List<Object[]> gethistory(@Param("userid") Integer userid);
 
-
-
-
+    //通过热度寻找所有文章
+    @Query(value = "select * from article ORDER BY hot DESC",nativeQuery = true)
+    List<Object[]> getArticleByHot();
 }

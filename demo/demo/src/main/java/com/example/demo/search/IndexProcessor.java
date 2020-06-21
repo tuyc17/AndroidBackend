@@ -21,19 +21,19 @@ public class IndexProcessor {
             // 利用分词工具创建 IndexWriter
             IndexWriter writer = new IndexWriter(INDEX_STORE_PATH,new MMAnalyzer(),true);
             File filesDir = new File(inputDir);
-            // 取得 要建立 索引的文件数组
+            // 取得要建立索引的文件数组
             File[] files = filesDir.listFiles();
             for(int i = 0 ; i < files.length; i++){
                 String fileName = files[i].getName();
                 if(fileName.substring(fileName.lastIndexOf(".")).equals(".txt")){
                     // 创建新的Document
                     Document doc = new Document();
-                    // 为文件名创建一个 Field
-                    Field field = new Field("filename",files[i].getName(),Field.Store.YES,Field.Index.TOKENIZED);
+                    // 为文件名创建一个Field
+                    Field field = new Field("filename", files[i].getName(), Field.Store.YES, Field.Index.TOKENIZED);
                     doc.add(field);
-                    field = new Field("content",loadFileToString(files[i]),Field.Store.NO,Field.Index.TOKENIZED);
+                    field = new Field("content", loadFileToString(files[i]), Field.Store.NO, Field.Index.TOKENIZED);
                     doc.add(field);
-                    // 把Document加入 IndexWriter
+                    // 把Document加入IndexWriter
                     writer.addDocument(doc);
                 }
             }
@@ -44,7 +44,7 @@ public class IndexProcessor {
         }
 
     }
-    //加载文档 生成字符串
+    // 加载文档 生成字符串
     public String loadFileToString(File f) {
         try{
             BufferedReader br = new BufferedReader(new FileReader(f));
