@@ -17,7 +17,10 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //TODO：编写文章搜索算法,建议使用模糊查询
     //搜索文章
 
-
+    //查询文章
+    @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
+            " from article where (id = :articleId) ",nativeQuery = true)
+    List<Object[]> findbyid(@Param("articleId") Integer articleId);
 
     //文章点赞
     @Modifying
@@ -93,16 +96,16 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
             "VALUES (:id, :content,:articleId,0,:publishtime);" ,nativeQuery = true)
     int publishComment(@Param("id") Integer id, @Param("content")String content, @Param("articleId") Integer articleId
             ,@Param("publishtime")java.sql.Timestamp publishtime);
-    //更新浏览记录
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO scanrecord(userid, articleid, scantime, articlename, articletheme) " +
-            "VALUES (:id, :articleId,:scantime,:articlename, :articletheme);" ,nativeQuery = true)
-    int addHistory(@Param("id") Integer id, @Param("articleId") Integer articleId,
-                   @Param("scantime")java.sql.Timestamp scantime,
-                   @Param("articlename") String articlename,@Param("articletheme") String articletheme
-
-    );
+//    //更新浏览记录
+//    @Modifying
+//    @Transactional
+//    @Query(value = "INSERT INTO scanrecord(userid, articleid, scantime, articlename, articletheme) " +
+//            "VALUES (:id, :articleId,:scantime,:articlename, :articletheme);" ,nativeQuery = true)
+//    int addHistory(@Param("id") Integer id, @Param("articleId") Integer articleId,
+//                   @Param("scantime")java.sql.Timestamp scantime,
+//                   @Param("articlename") String articlename,@Param("articletheme") String articletheme
+//
+//    );
     //add失败，更新时间
     @Modifying
     @Transactional

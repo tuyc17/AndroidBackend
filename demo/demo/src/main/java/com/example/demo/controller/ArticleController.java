@@ -9,15 +9,15 @@ import java.util.Map;
 
 import com.example.demo.config.MyUserDetails;
 import com.example.demo.dao.CommentRepository;
+import com.example.demo.dao.ScanRecordRepository;
 import com.example.demo.dao.UserRepository;
-import com.example.demo.domain.Article;
-import com.example.demo.domain.Comment;
+import com.example.demo.domain.*;
 // import com.sun.javafx.collections.MappingChange;
 import com.example.demo.search.IndexProcessor;
 import com.example.demo.search.Search;
-import com.example.demo.domain.Friend;
 import org.apache.ibatis.annotations.Update;
 
+import org.hibernate.query.criteria.internal.expression.function.AggregationFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,9 +31,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.config.WebSocketServer;
 import org.springframework.web.bind.annotation.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import com.example.demo.dao.ArticleRepository;
-import com.example.demo.domain.User;
 import org.springframework.scheduling.annotation.Scheduled;
 
 @RestController
@@ -45,6 +52,8 @@ public class ArticleController {
     UserRepository userRepository;
     @Autowired
     CommentRepository commentRepository;
+    @Autowired
+    ScanRecordRepository scanRecordRepository;
 
     // 发布文章
     @PostMapping("/article")
@@ -63,11 +72,23 @@ public class ArticleController {
         article.setAuthorId(id);
         article.setPublishTime(ctime);
         article.setArticleTheme(theme);
-        articleRepository.save(article);
-        article.setContent(article.getId().toString()+".txt");
+        //找第一个分隔符
+        Integer[] t ={content.indexOf("。"),content.indexOf("!"),content.indexOf("."),20};
+        Integer min = 99;
+        for (Integer index:t) {
+            if (index==-1){
+                continue;
+            }
+            if (min>=index){
+                min = index;
+            }
+        }
+
+        article.setContent(content.substring(0,min));
         articleRepository.save(article);
         Integer articleId = article.getId();
-        File contentDir = new File("search"+File.separator+"content"+File.separator+articleId.toString()+".txt");
+        File contentDir = new File("search" + File.separator + "content"
+                + File.separator + articleId.toString() + ".txt");
         // File contentDir = new File("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content\\"+articleId.toString()+".txt");
         try {
             contentDir.createNewFile();
@@ -78,8 +99,7 @@ public class ArticleController {
             bwriter.write(content);
             bwriter.flush();
             bwriter.close();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         map.put("code", 200);
@@ -119,27 +139,27 @@ public class ArticleController {
         // 将String分解为List<String>
         Map<String, Object> map = new HashMap<>();
         List<String> targetList = new ArrayList<String>();
-        for(int i = 0; i + 2 < target.length(); i++) {
-            targetList.add(target.substring(i, i+2));
+        for (int i = 0; i + 2 < target.length(); i++) {
+            targetList.add(target.substring(i, i + 2));
         }
-        targetList.add(target.substring(target.length()-2));
+        targetList.add(target.substring(target.length() - 2));
 
-        IndexProcessor pr = new  IndexProcessor();
+        IndexProcessor pr = new IndexProcessor();
         pr.createIndex("search" + File.separator + "content");
         // pr.createIndex("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content");
         Search s = new Search();
         List<Integer> tempret = s.indexSearch("content", targetList);
         List<Article> ret = new ArrayList();
         int hotIncrease = 20;
-        for (Integer i:tempret) {
+        for (Integer i : tempret) {
             //热度增加
             Article article = articleRepository.findById(i).get();
-            article.setHot(article.getHot()+hotIncrease);
+            article.setHot(article.getHot() + hotIncrease);
             articleRepository.save(article);
             ret.add(article);
         }
-        map.put("article",ret);
-        map.put("code",200);
+        map.put("article", ret);
+        map.put("code", 200);
         return map;
     }
 
@@ -151,27 +171,35 @@ public class ArticleController {
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
+        Object[] article2;
         Article article;
         try {
             article = articleRepository.findById(articleId).get();
-            // 获取article中记录的文本保存路径，在该路径中打开文件获取内容，写入setContent()中，但是不能save！
-            String path = article.getContent();
+            article2 = articleRepository.findbyid(articleId).get(0);
+            String[] strList = {"id", "articlename", "articletheme", "authorid",
+                    "content", "iswithdrew", "praisecount", "publishtime"};
+            Map<String, Object> temp = new HashMap<>();
+            for (int i = 0; i < strList.length; i++) {
+                if (article2[i] != null) {
+                    temp.put(strList[i], article2[i]);
+                }
+            }
+            String path = article.getId()+".txt";
             BufferedReader br = new BufferedReader(
                     new FileReader("search" + File.separator + "content" + File.separator + path));
             String paragraph = null;
             String line = null;
-            while((line = br.readLine()) != null) {
-                if(paragraph == null) {
+            while ((line = br.readLine()) != null) {
+                if (paragraph == null) {
                     paragraph = line;
-                }
-                else {
+                } else {
                     paragraph = paragraph + line;
                 }
             }
-            article.setContent(paragraph);
-            map.put("article", article);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
-        }
-        catch (Exception e) {
+            temp.put("content",paragraph);
+            map.put("article", temp);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
+
+        } catch (Exception e) {
             map.put("code", 400);
             map.put("msg", "错误：文章不存在");
             return map;
@@ -198,12 +226,25 @@ public class ArticleController {
             ret.add(temp);
         }
         map.put("comments", ret);
-        //下面更新浏览记录
-        try {
-            articleRepository.addHistory(id, articleId, ctime, article.getArticleName(), article.getArticleTheme());
-        } catch (Exception e) {
-            articleRepository.changeHistory(id, articleId, ctime);
+        // 更新浏览记录
+        ScanRecord scanRecord = new ScanRecord();
+        scanRecord.setArticleId(articleId);
+        scanRecord.setArticleName(article.getArticleName());
+        scanRecord.setArticleTheme(article.getArticleTheme());
+
+        scanRecord.setUserId(id);
+        List<ScanRecord> temp = scanRecordRepository.findAll(Example.of(scanRecord));
+        if (temp.size()!=0){
+            scanRecord = temp.get(0);
+            scanRecord.setScanTime(ctime);
+            scanRecordRepository.save(scanRecord);
         }
+        else{
+            scanRecord.setScanTime(ctime);
+            scanRecordRepository.save(scanRecord);
+        }
+
+
         // 更新文章热度
         article.setHot(article.getHot() + 1);
         articleRepository.save(article);
@@ -445,20 +486,14 @@ public class ArticleController {
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         List<Object[]> retHistory;
+        List<Article> articles = new ArrayList<>();
         List<Map<String, Object>> ret = new ArrayList<>();
         retHistory = articleRepository.gethistory(id);
         //下面转换一下格式
-        String[] strList = {"userid", "articleid", "scantime", "title", "theme"};
         for (Object[] record : retHistory) {
-            Map<String, Object> temp = new HashMap<>();
-            for (int i = 0; i < strList.length; i++) {
-                if (record[i] != null) {
-                    temp.put(strList[i], record[i]);
-                }
-            }
-            ret.add(temp);
+            articles.add(articleRepository.findById((Integer) record[1]).get());
         }
-        map.put("history", ret);
+        map.put("articles", articles);
         map.put("code", 200);
         return map;
     }
@@ -575,11 +610,12 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
     // 返回文章是否被点赞
     @GetMapping("/ispraised")
     @ResponseBody
-    public Map<String, Object> isPraised(Integer articleId){
-        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+    public Map<String, Object> isPraised(Integer articleId) {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         //判断文章是否被此人点赞过
@@ -591,20 +627,20 @@ public class ArticleController {
             map.put("msg", "查询点赞出错");
             return map;
         }
-        if (temp.size()==0){
+        if (temp.size() == 0) {
             map.put("code", 200);
             return map;
-        }
-        else{
+        } else {
             map.put("code", 201);
             return map;
         }
     }
+
     // 返回文章是否被收藏
     @GetMapping("/isfavorited")
     @ResponseBody
-    public Map<String, Object> isfavorited(Integer articleId){
-        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+    public Map<String, Object> isfavorited(Integer articleId) {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         //判断文章是否被收藏
@@ -616,20 +652,20 @@ public class ArticleController {
             map.put("msg", "查询收藏出错");
             return map;
         }
-        if (temp.size()==0){
+        if (temp.size() == 0) {
             map.put("code", 200);
             return map;
-        }
-        else{
+        } else {
             map.put("code", 201);
             return map;
         }
     }
+
     // 返回评论是否被点赞
     @GetMapping("/commentispraised")
     @ResponseBody
-    public Map<String, Object> commentIsPraised(Integer commentId){
-        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+    public Map<String, Object> commentIsPraised(Integer commentId) {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         //判断文章是否被收藏
@@ -641,21 +677,21 @@ public class ArticleController {
             map.put("msg", "查询收藏出错");
             return map;
         }
-        if (temp.size()==0){
+        if (temp.size() == 0) {
             map.put("code", 200);
             return map;
-        }
-        else{
+        } else {
             map.put("code", 201);
             return map;
         }
     }
+
     //获取收藏文章数
     @GetMapping("/favoritecount")
     @ResponseBody
     public Map<String, Object> getArticleCountByFavorite() {
         MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Integer id= myUserDetails.getId();
+        Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         Integer ret = articleRepository.getArticleCountByFavorite(id);
         //下面转换一下格式
@@ -663,12 +699,13 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
     //获取发表文章数
     @GetMapping("/articlecount")
     @ResponseBody
     public Map<String, Object> getArticleByauthorid() {
         MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Integer id= myUserDetails.getId();
+        Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         Integer ret = articleRepository.getArticleCountByauthorid(id);
         //下面转换一下格式
@@ -676,27 +713,34 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
     //上传文件
-//    @PostMapping("/upload")
-//    @ResponseBody
-//    public Map<String, Object> handleFormUpload(@RequestParam("file") MultipartFile file
-//                            ,Integer articleId) {
-//        try{
-//            if (!file.isEmpty()) {
-//                byte[] bytes = file.getBytes();
-//                File picture = new File("downloadfile"+File.separator+articleId.toString());//这里指明上传文件保存的地址
-//                FileOutputStream fos = new FileOutputStream(picture);
-//                BufferedOutputStream bos = new BufferedOutputStream(fos);
-//                bos.write(bytes);
-//                bos.close();
-//                fos.close();
-//                return "success";
-//            }
-//        }catch (IOException e){
-//            System.out.println(e);
-//        }
-//        return "failed";
-//    }
+    @PostMapping("/upload")
+    @ResponseBody
+    public Map<String, Object> handleFormUpload(MultipartFile file
+                            ,Integer articleId) {
+        Map<String, Object> map = new HashMap<>();
+        try{
+            if (!file.isEmpty()) {
+                new File("downloadfile"+File.separator+articleId.toString()).mkdirs();
+                byte[] bytes = file.getBytes();
+                File picture = new File("downloadfile"+File.separator
+                        +articleId.toString()+File.separator+file.getOriginalFilename());//这里指明上传文件保存的地址
+                FileOutputStream fos = new FileOutputStream(picture);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                bos.write(bytes);
+                bos.close();
+                fos.close();
+                map.put("code", 200);
+                return map;
+            }
+        }catch (IOException e){
+            System.out.println(e);
+        }
+        map.put("code", 400);
+        return map;
+    }
+
     // 每天零点调用的函数，让热度下降1/3
     //每天0：00执行
     @Scheduled(cron = "0 00 00 ? * *")

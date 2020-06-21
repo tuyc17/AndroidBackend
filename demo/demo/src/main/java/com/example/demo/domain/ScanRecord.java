@@ -3,11 +3,7 @@ package com.example.demo.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 // 6,浏览历史记录类，用于表示特定用户浏览特定文章的基本信息
 // 浏览历史记录基本信息，包括用户id，文章id，浏览时间
@@ -16,14 +12,14 @@ import javax.persistence.Table;
 @Table(name = "scanrecord")
 public class ScanRecord implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    // 用户id、文章id双主键
-    // 用户id
+    // 主键为历史记录id
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    // 用户id
     @Column(name = "userid")
     private Integer userId;
     // 文章id
-    @Id
     @Column(name = "articleid")
     private Integer articleId;
     // 浏览时间
@@ -46,6 +42,14 @@ public class ScanRecord implements Serializable {
 //        this.passWord = passWord;
 //    }
 
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return id;
+    }
 
     public String getArticleName() {
         return articleName;
