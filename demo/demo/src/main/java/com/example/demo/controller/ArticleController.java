@@ -18,7 +18,6 @@ import com.example.demo.domain.Comment;
 import com.example.demo.search.IndexProcessor;
 import com.example.demo.search.Search;
 import com.example.demo.domain.Friend;
-import com.sun.javafx.collections.MappingChange;
 import org.apache.ibatis.annotations.Update;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,16 @@ public class ArticleController {
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
         // 将文章内容content写进目录下
-        File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+id.toString()+".txt");
+        Article article = new Article();
+        article.setPraiseCount(0);
+        article.setHot(0);
+        article.setArticleName(title);
+        article.setAuthorId(id);
+        article.setPublishTime(ctime);
+        article.setArticleTheme(theme);
+        articleRepository.save(article);
+        Integer articleId = article.getId();
+        File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+articleId.toString()+".txt");
         try {
             contentDir.createNewFile();
             FileWriter fwriter = new FileWriter(contentDir, false);
@@ -66,9 +74,10 @@ public class ArticleController {
             e.printStackTrace();
         }
         // 将content路径插入表中
-        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+//        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+        article.setContent(articleId.toString()+".txt");
+        articleRepository.save(article);
         map.put("status", 200);
-
         return map;
     }
 
@@ -101,8 +110,9 @@ public class ArticleController {
     // TODO：编写文章搜索算法,建议使用模糊查询
     // 搜索文章
     @RequestMapping("/search")
-    public List<Integer> search(String target) {
+    public Map<String, Object> search(String target) {
         // 将String分解为List<String>
+        Map<String, Object> map = new HashMap<>();
         List<String> targetList = new ArrayList<String>();
         for(int i = 0; i + 2 < target.length(); i++) {
             targetList.add(target.substring(i, i+2));
@@ -112,8 +122,19 @@ public class ArticleController {
         IndexProcessor pr = new  IndexProcessor();
         pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
         Search s = new Search();
-
-        return s.indexSearch("content", targetList);
+        List<Integer> tempret = s.indexSearch("content", targetList);
+        List<Article> ret = new ArrayList();
+        int hotIncrease = 20;
+        for (Integer i:tempret) {
+            //热度增加
+            Article article = articleRepository.findById(i).get();
+            article.setHot(article.getHot()+hotIncrease);
+            articleRepository.save(article);
+            ret.add(article);
+        }
+        map.put("article",ret);
+        map.put("code",200);
+        return map;
     }
 
 

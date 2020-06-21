@@ -119,8 +119,8 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     List<Object[]> getArticleByHot();
     // 获取某人的所有文章
     @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
-            " from article where authorid = :id",nativeQuery = true)
-    List<Object[]> getArticleById(@Param("id") Integer id);
+            " from article where authorid = :authorid",nativeQuery = true)
+    List<Object[]> getArticleById(@Param("authorid") Integer authorid);
 
 //    // 通过主键id寻找文章
 //    // @Query(value = "select * from article where id = :id", nativeQuery = true)
