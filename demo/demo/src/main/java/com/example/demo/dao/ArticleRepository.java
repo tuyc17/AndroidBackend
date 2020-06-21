@@ -1,22 +1,23 @@
 package com.example.demo.dao;
 
-import com.example.demo.domain.Friend;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.domain.Article;
-import com.example.demo.domain.ArticlePraise;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Integer>{
     //TODO：编写热推文章算法，建议使用深度学习
     //获取热推文章
     //TODO：编写文章搜索算法,建议使用模糊查询
     //搜索文章
+
+
 
     //文章点赞
     @Modifying
@@ -120,4 +121,9 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
     @Query(value = "select id, articlename, articletheme, authorid, content, iswithdrew, praisecount, publishtime, hot" +
             " from article where authorid = :id",nativeQuery = true)
     List<Object[]> getArticleById(@Param("id") Integer id);
+
+//    // 通过主键id寻找文章
+//    // @Query(value = "select * from article where id = :id", nativeQuery = true)
+//    Optional<Article> findById(Integer id);
+
 }

@@ -1,5 +1,9 @@
 package com.example.demo.controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +14,13 @@ import com.example.demo.dao.CommentRepository;
 import com.example.demo.dao.UserRepository;
 import com.example.demo.domain.Article;
 import com.example.demo.domain.Comment;
+// import com.sun.javafx.collections.MappingChange;
+import com.example.demo.search.IndexProcessor;
+import com.example.demo.search.Search;
 import com.example.demo.domain.Friend;
 import com.sun.javafx.collections.MappingChange;
 import org.apache.ibatis.annotations.Update;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,19 +45,34 @@ public class ArticleController {
     @Autowired
     CommentRepository commentRepository;
 
-    //发布文章
+    // 发布文章
     @PostMapping("/article")
     public Map<String, Object> publish(String title, String content, String theme) {
         MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
-        articleRepository.publish(title, content, id, theme, ctime);
-        map.put("code", 200);
+        // 将文章内容content写进目录下
+        File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+id.toString()+".txt");
+        try {
+            contentDir.createNewFile();
+            FileWriter fwriter = new FileWriter(contentDir, false);
+            BufferedWriter bwriter = new BufferedWriter(fwriter);
+            bwriter.write(content);
+            bwriter.flush();
+            bwriter.close();
+            fwriter.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        // 将content路径插入表中
+        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+        map.put("status", 200);
+
         return map;
     }
 
-    //发布评论
+    // 发布评论
     @PostMapping("/comment")
     public Map<String, Object> publishComment(Integer articleId, String content) {
         MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -75,11 +98,26 @@ public class ArticleController {
     //TODO：编写热推文章算法，建议使用深度学习
     //获取热推文章
 
-    //TODO：编写文章搜索算法,建议使用模糊查询
-    //搜索文章
+    // TODO：编写文章搜索算法,建议使用模糊查询
+    // 搜索文章
+    @RequestMapping("/search")
+    public List<Integer> search(String target) {
+        // 将String分解为List<String>
+        List<String> targetList = new ArrayList<String>();
+        for(int i = 0; i + 2 < target.length(); i++) {
+            targetList.add(target.substring(i, i+2));
+        }
+        targetList.add(target.substring(target.length()-2));
+
+        IndexProcessor pr = new  IndexProcessor();
+        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+        Search s = new Search();
+
+        return s.indexSearch("content", targetList);
+    }
 
 
-    //阅读特定文章
+    // 阅读特定文章
     @GetMapping("/read")
     public Map<String, Object> getArticle(Integer articleId) {
         MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -89,13 +127,13 @@ public class ArticleController {
         Article article;
         try {
             article = articleRepository.findById(articleId).get();
-            map.put("article", article);
+            map.put("article", article);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
         } catch (Exception e) {
             map.put("code", 400);
             map.put("msg", "错误：文章不存在");
             return map;
         }
-        //拿所有的评论
+        // 拿所有的评论
         List<Object[]> comments;
         try {
             comments = articleRepository.getCommentByArticle(articleId);
@@ -105,7 +143,7 @@ public class ArticleController {
             return map;
         }
         List<Map<String, Object>> ret = new ArrayList<>();
-        //下面转换一下格式
+        // 下面转换一下格式
         String[] strList = {"id", "authorid", "content", "farticleid", "fcommentid", "praisecount", "publish_time"};
         for (Object[] record : comments) {
             Map<String, Object> temp = new HashMap<>();
@@ -130,7 +168,7 @@ public class ArticleController {
         return map;
     }
 
-    //收藏/取消收藏文章
+    // 收藏/取消收藏文章
     @PostMapping("/favorite")
     @ResponseBody
     public Map<String, Object> favorite(Integer articleId) {
@@ -138,9 +176,9 @@ public class ArticleController {
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         Article article;
-        //先拿到对应文章
+        // 先拿到对应文章
         try {
-            article = articleRepository.findById(articleId).get();
+            article = articleRepository.findById(articleId).get();  // TODO:这里好像不涉及文章内容？
         } catch (Exception e) {
             map.put("code", 400);
             map.put("msg", "错误：文章不存在");
@@ -203,7 +241,7 @@ public class ArticleController {
         return map;
     }
 
-    //点赞/取消点赞文章
+    // 点赞/取消点赞文章
     @PostMapping("/praiseArticle")
     @ResponseBody
     public Map<String, Object> praise(Integer articleId) {
@@ -213,15 +251,15 @@ public class ArticleController {
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
         Article article;
-        //先拿到对应文章
+        // 先拿到对应文章
         try {
-            article = articleRepository.findById(articleId).get();
+            article = articleRepository.findById(articleId).get();  //
         } catch (Exception e) {
             map.put("code", 400);
             map.put("msg", "错误：文章不存在");
             return map;
         }
-        //拿到文章作者
+        // 拿到文章作者
         User author;
         try {
             author = userRepository.findById(article.getAuthorId()).get();
@@ -231,7 +269,7 @@ public class ArticleController {
             return map;
         }
 
-        //判断文章是否被此人点赞过
+        // 判断文章是否被此人点赞过
         List<Object[]> temp;
         try {
             temp = articleRepository.isPraised(id, articleId);

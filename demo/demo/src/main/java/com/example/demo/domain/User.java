@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 // 2020/6/16 涂亦驰
 @Entity
 @Table(name = "user")
-//类注解，空列不参与序列化
+// 类注解，空列不参与序列化
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
