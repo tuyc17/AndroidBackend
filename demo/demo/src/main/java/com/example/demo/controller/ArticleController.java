@@ -152,8 +152,19 @@ public class ArticleController {
             article = articleRepository.findById(articleId).get();
             // 获取article中记录的文本保存路径，在该路径中打开文件获取内容，写入setContent()中，但是不能save！
             String path = article.getContent();
-
-            article.setContent("卡特琳娜");
+            BufferedReader br = new BufferedReader(
+                    new FileReader(path));
+            String paragraph = null;
+            String line = null;
+            while((line = br.readLine()) != null) {
+                if(paragraph == null) {
+                    paragraph = line;
+                }
+                else {
+                    paragraph = paragraph + line;
+                }
+            }
+            article.setContent(paragraph);
             map.put("article", article);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
         }
         catch (Exception e) {
