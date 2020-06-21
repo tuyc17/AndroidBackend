@@ -17,9 +17,11 @@ import com.example.demo.domain.Comment;
 // import com.sun.javafx.collections.MappingChange;
 import com.example.demo.search.IndexProcessor;
 import com.example.demo.search.Search;
+import com.example.demo.domain.Friend;
 import org.apache.ibatis.annotations.Update;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,6 +33,7 @@ import com.example.demo.config.WebSocketServer;
 import com.example.demo.dao.ArticleRepository;
 import com.example.demo.domain.User;
 import org.springframework.scheduling.annotation.Scheduled;
+
 @RestController
 @RequestMapping("article")
 public class ArticleController {
@@ -52,7 +55,17 @@ public class ArticleController {
         articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
 
         // 将文章内容content写进目录下
-        File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+id.toString()+".txt");
+        Article article = new Article();
+        article.setPraiseCount(0);
+        article.setHot(0);
+        article.setArticleName(title);
+        article.setAuthorId(id);
+        article.setPublishTime(ctime);
+        article.setArticleTheme(theme);
+        articleRepository.save(article);
+        Integer articleId = article.getId();
+        File contentDir = new File(File.separator+"search"+File.separator+"content"+File.separator+articleId.toString()+".txt");
+        // File contentDir = new File("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content\\"+articleId.toString()+".txt");
         try {
             contentDir.createNewFile();
             FileWriter fwriter = new FileWriter(contentDir, false);
@@ -61,13 +74,11 @@ public class ArticleController {
             bwriter.flush();
             bwriter.close();
             fwriter.close();
-        } catch(Exception e) {
+        }
+        catch(Exception e) {
             e.printStackTrace();
         }
-        // 将content路径插入表中
-
-        map.put("status", 200);
-
+        map.put("code", 200);
         return map;
     }
 
@@ -100,8 +111,9 @@ public class ArticleController {
     // TODO：编写文章搜索算法,建议使用模糊查询
     // 搜索文章
     @RequestMapping("/search")
-    public List<Integer> search(String target) {
+    public Map<String, Object> search(String target) {
         // 将String分解为List<String>
+        Map<String, Object> map = new HashMap<>();
         List<String> targetList = new ArrayList<String>();
         for(int i = 0; i + 2 < target.length(); i++) {
             targetList.add(target.substring(i, i+2));
@@ -109,10 +121,22 @@ public class ArticleController {
         targetList.add(target.substring(target.length()-2));
 
         IndexProcessor pr = new  IndexProcessor();
-        pr.createIndex("src\\main\\java\\com\\example\\demo\\search\\content");
+        pr.createIndex(File.separator+"search" + File.separator + "content");
+        // pr.createIndex("D:\\GitLib\\AndroidBackend\\demo\\demo\\search\\content");
         Search s = new Search();
-
-        return s.indexSearch("content", targetList);
+        List<Integer> tempret = s.indexSearch("content", targetList);
+        List<Article> ret = new ArrayList();
+        int hotIncrease = 20;
+        for (Integer i:tempret) {
+            //热度增加
+            Article article = articleRepository.findById(i).get();
+            article.setHot(article.getHot()+hotIncrease);
+            articleRepository.save(article);
+            ret.add(article);
+        }
+        map.put("article",ret);
+        map.put("code",200);
+        return map;
     }
 
 
@@ -465,8 +489,9 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
     // 热搜功能，推荐5个最热文章
-    @GetMapping("/got")
+    @GetMapping("/hot")
     @ResponseBody
     public Map<String, Object> getByHot() {
         Map<String, Object> map = new HashMap<>();
@@ -486,8 +511,8 @@ public class ArticleController {
                 }
             }
             ret.add(temp);
-            index+=1;
-            if (index==5){
+            index += 1;
+            if (index == 5) {
                 break;
             }
         }
@@ -495,13 +520,124 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
+
+    //获取某人的所有文章
+    @GetMapping("/person")
+    @ResponseBody
+    public Map<String, Object> getByPerson(Integer id) {
+        MyUserDetails myUserDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (id == -1) {
+            //表示拿自己的文章
+            id = myUserDetails.getId();
+        }
+        Map<String, Object> map = new HashMap<>();
+        List<Object[]> objectLists;
+        List<Map<String, Object>> ret = new ArrayList<>();
+
+        objectLists = articleRepository.getArticleByauthorid(id);
+        //下面转换一下格式
+        String[] strList = {"id", "articlename", "articletheme", "authorid",
+                "content", "iswithdrew", "praisecount", "publishtime"};
+        int index = 0;
+        for (Object[] record : objectLists) {
+            Map<String, Object> temp = new HashMap<>();
+            for (int i = 0; i < strList.length; i++) {
+                if (record[i] != null) {
+                    temp.put(strList[i], record[i]);
+                }
+            }
+            ret.add(temp);
+            index += 1;
+            if (index == 5) {
+                break;
+            }
+        }
+        map.put("articles", ret);
+        map.put("code", 200);
+        return map;
+    }
+    // 返回文章是否被点赞
+    @GetMapping("/ispraised")
+    @ResponseBody
+    public Map<String, Object> isPraised(Integer articleId){
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        //判断文章是否被此人点赞过
+        List<Object[]> temp;
+        try {
+            temp = articleRepository.isPraised(id, articleId);
+        } catch (Exception e) {
+            map.put("code", 401);
+            map.put("msg", "查询点赞出错");
+            return map;
+        }
+        if (temp.size()==0){
+            map.put("code", 200);
+            return map;
+        }
+        else{
+            map.put("code", 201);
+            return map;
+        }
+    }
+    // 返回文章是否被收藏
+    @GetMapping("/isfavorited")
+    @ResponseBody
+    public Map<String, Object> isfavorited(Integer articleId){
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        //判断文章是否被收藏
+        List<Object[]> temp;
+        try {
+            temp = articleRepository.isFavorite(id, articleId);
+        } catch (Exception e) {
+            map.put("code", 401);
+            map.put("msg", "查询收藏出错");
+            return map;
+        }
+        if (temp.size()==0){
+            map.put("code", 200);
+            return map;
+        }
+        else{
+            map.put("code", 201);
+            return map;
+        }
+    }
+    // 返回评论是否被点赞
+    @GetMapping("/commentispraised")
+    @ResponseBody
+    public Map<String, Object> commentIsPraised(Integer commentId){
+        MyUserDetails myUserDetails= (MyUserDetails) SecurityContextHolder.getContext().getAuthentication() .getPrincipal();
+        Integer id = myUserDetails.getId();
+        Map<String, Object> map = new HashMap<>();
+        //判断文章是否被收藏
+        List<Object[]> temp;
+        try {
+            temp = articleRepository.isPraisedComment(id, commentId);
+        } catch (Exception e) {
+            map.put("code", 401);
+            map.put("msg", "查询收藏出错");
+            return map;
+        }
+        if (temp.size()==0){
+            map.put("code", 200);
+            return map;
+        }
+        else{
+            map.put("code", 201);
+            return map;
+        }
+    }
     // 每天零点调用的函数，让热度下降1/3
     //每天0：00执行
     @Scheduled(cron = "0 00 00 ? * *")
-    public void hotDecrease(){
+    public void hotDecrease() {
         List<Article> articles = articleRepository.findAll();
-        for (Article article: articles) {
-            article.setHot(article.getHot()*2/3);
+        for (Article article : articles) {
+            article.setHot(article.getHot() * 2 / 3);
             articleRepository.save(article);
         }
     }
