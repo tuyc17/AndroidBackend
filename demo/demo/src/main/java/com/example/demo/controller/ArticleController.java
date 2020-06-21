@@ -48,6 +48,9 @@ public class ArticleController {
         Integer id = myUserDetails.getId();
         Map<String, Object> map = new HashMap<>();
         java.sql.Timestamp ctime = new java.sql.Timestamp(new java.util.Date().getTime());
+
+        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+
         // 将文章内容content写进目录下
         File contentDir = new File("src\\main\\java\\com\\example\\demo\\search\\content\\"+id.toString()+".txt");
         try {
@@ -62,7 +65,7 @@ public class ArticleController {
             e.printStackTrace();
         }
         // 将content路径插入表中
-        articleRepository.publish(title, id.toString()+".txt", id, theme, ctime);
+
         map.put("status", 200);
 
         return map;
@@ -124,7 +127,8 @@ public class ArticleController {
         try {
             article = articleRepository.findById(articleId).get();
             map.put("article", article);    // TODO:这里直接传递了article，但是这里的content是文章路径，需要修改
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             map.put("code", 400);
             map.put("msg", "错误：文章不存在");
             return map;
