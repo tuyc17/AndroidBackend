@@ -128,6 +128,13 @@
             <version>4.10.0</version>
         </dependency>
         <dependency>
+            <groupId>je-analysis-1.5.3</groupId>
+            <artifactId>je-analysis-1.5.3</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/libs/je-analysis-1.5.3.jar</systemPath>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
@@ -186,8 +193,26 @@
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
-                        <extdirs>${project.basedir}/src/main/java/com/example/demo/lib/je-analysis-1.5.3</extdirs>
+                        <extdirs>${project.basedir}/libs/je-analysis-1.5.3</extdirs>
                     </compilerArguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.example.demo.DemoApplication</mainClass>
+                        </manifest>
+                    </archive>
+                    <excludes>
+                        <exclude>${project.basedir}/xml/*</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

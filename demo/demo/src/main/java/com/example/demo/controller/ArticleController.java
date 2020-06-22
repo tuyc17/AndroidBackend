@@ -2,10 +2,7 @@ package com.example.demo.controller;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.example.demo.config.MyUserDetails;
 import com.example.demo.dao.CommentRepository;
@@ -73,7 +70,7 @@ public class ArticleController {
         article.setPublishTime(ctime);
         article.setArticleTheme(theme);
         //找第一个分隔符
-        Integer[] t ={content.indexOf("。"),content.indexOf("!"),content.indexOf("."),20};
+        Integer[] t ={content.indexOf("。"),content.indexOf("!"),content.indexOf("."),20,content.length()-1};
         Integer min = 99;
         for (Integer index:t) {
             if (index==-1){
@@ -103,6 +100,7 @@ public class ArticleController {
             e.printStackTrace();
         }
         map.put("code", 200);
+        map.put("id",articleId);
         return map;
     }
 
@@ -129,9 +127,6 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
-    //TODO：编写热推文章算法，建议使用深度学习
-    //获取热推文章
-
     // TODO：编写文章搜索算法,建议使用模糊查询
     // 搜索文章
     @RequestMapping("/search")
@@ -162,7 +157,21 @@ public class ArticleController {
         map.put("code", 200);
         return map;
     }
-
+    // 搜索文章
+    // 查找文章
+    @GetMapping("/fakesearch")
+    @ResponseBody
+    public Map<String, Object> fakesearch(String target) {
+        Map<String, Object> map = new HashMap<>();
+        List<Integer> rets = articleRepository.select(target);
+        List<Article> articles = new ArrayList<>();
+        for (Integer ret : rets) {
+            articles.add(articleRepository.findById(ret).get());
+        }
+        map.put("articles",articles);
+        map.put("code", 200);
+        return map;
+    }
 
     // 阅读特定文章
     @GetMapping("/read")
@@ -740,6 +749,52 @@ public class ArticleController {
         map.put("code", 400);
         return map;
     }
+
+    //下载文件
+    @GetMapping("/download")
+    @ResponseBody
+    static void download(HttpServletResponse response, Integer articleId){
+        String path="downloadfile"+File.separator +articleId.toString();
+        File theDir =new File(path);
+        File file;
+        if (theDir.length()==0){
+            response.setHeader("code","201");
+        }
+        else{
+            file = theDir.listFiles()[0];
+            ServletOutputStream out = null;
+            FileInputStream in = null;
+            try {
+                in = new FileInputStream(file);
+                //设置文件ContentType类型
+                response.setContentType("multipart/form-data");
+                //设置文件头：最后一个参数是设置下载文件名
+                response.setHeader("Content-Disposition", file.getName());
+                out = response.getOutputStream();
+                // 读取文件流
+                int len = 0;
+                byte[] buffer = new byte[1024 * 10];
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+                out.flush();
+            } catch (FileNotFoundException e) {
+                System.out.println("responseFileStream error:FileNotFoundException" + e.toString());
+            } catch (Exception e) {
+                System.out.println("responseFileStream error:" + e.toString());
+            } finally {
+                try {
+                    out.close();
+                    in.close();
+                } catch (NullPointerException e) {
+                    System.out.println("responseFileStream stream close() error:NullPointerException" + e.toString());
+                } catch (Exception e) {
+                    System.out.println("responseFileStream stream close() error:" + e.toString());
+                }
+            }
+        }
+    }
+
 
     // 每天零点调用的函数，让热度下降1/3
     //每天0：00执行

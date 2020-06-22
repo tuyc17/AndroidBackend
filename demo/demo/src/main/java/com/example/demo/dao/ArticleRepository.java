@@ -134,5 +134,8 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>{
 //    // 通过主键id寻找文章
 //    // @Query(value = "select * from article where id = :id", nativeQuery = true)
 //    Optional<Article> findById(Integer id);
-
+    @Query(value = "select id from article where " +
+            "articlename like %:target% or articletheme like %:target% " +
+            "or content like %:target%",nativeQuery = true)
+    List<Integer> select(@Param("target") String target);
 }

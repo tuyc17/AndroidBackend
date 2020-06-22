@@ -24,6 +24,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     //用户注册
 
     // 获取全部用户的昵称
-    // @Query(value = "select id from user where username like 123 or studentid like ")
+     @Query(value = "select id from user where username like %:target% or studentid like %:target%",nativeQuery = true)
+     List<Integer> select(@Param("target") String target);
 
 }

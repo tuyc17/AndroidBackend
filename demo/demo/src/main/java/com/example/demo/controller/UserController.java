@@ -137,10 +137,18 @@ public class UserController {
         return map;
     }
 
-//    // 查找用户
-//    @GetMapping("/search")
-//    @ResponseBody
-//    public Map<String, Object> searchUser(String target) {
-//
-//    }
+    // 查找用户
+    @GetMapping("/search")
+    @ResponseBody
+    public Map<String, Object> searchUser(String target) {
+        Map<String, Object> map = new HashMap<>();
+        List<Integer> rets = userRepository.select(target);
+        List<User> users = new ArrayList<>();
+        for (Integer ret : rets) {
+            users.add(userRepository.findById(ret).get());
+        }
+        map.put("users",users);
+        map.put("code", 200);
+        return map;
+    }
 }
