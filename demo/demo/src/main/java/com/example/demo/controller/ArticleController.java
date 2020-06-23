@@ -70,7 +70,7 @@ public class ArticleController {
         article.setPublishTime(ctime);
         article.setArticleTheme(theme);
         //找第一个分隔符
-        Integer[] t ={content.indexOf("。"),content.indexOf("!"),content.indexOf("."),20,content.length()-1};
+        Integer[] t ={content.indexOf("。"),content.indexOf("!"),content.indexOf("."),20,content.length()};
         Integer min = 99;
         for (Integer index:t) {
             if (index==-1){
